@@ -43,7 +43,7 @@
         <i class="bi bi-people-fill"></i> Penyewa
         <span class="badge-nav">47</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="/pembayaran" class="nav-item">
         <i class="bi bi-cash-coin"></i> Pembayaran
       </a>
       <a href="#" class="nav-item">
