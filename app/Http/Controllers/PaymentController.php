@@ -17,6 +17,10 @@ class PaymentController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge([
+            'amount' => str_replace('.', '', $request->input('amount')),
+        ]);
+
         $validated = $request->validate([
             'tenant_name' => 'required|string|max:255',
             'amount' => 'required|numeric|min:1000',
