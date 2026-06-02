@@ -28,7 +28,25 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = $request->user();
+        $role = $user?->role ?? 'member';
+
+        // Pilih route tujuan berdasarkan role
+        if ($role === 'admin') {
+            $target = route('dashboard.admin', absolute: false);
+        } 
+        elseif ($role === 'tenant') {
+            // default untuk member/penyewa/tenant dsb.
+            $target = route('dashboard.tenant', absolute: false);
+        }
+        elseif ($role === 'penyewa') {
+            $target = route('dashboard.penyewa', absolute: false);
+        }
+        else {
+            $target = route('dashboard.tenant', absolute: false);
+        }
+
+        return redirect()->intended($target);
     }
 
     /**

@@ -2,11 +2,52 @@
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const form = document.currentScript && document.currentScript.closest ? document.currentScript.closest('form') : document.querySelector('form');
+                if (!form) return;
+                form.addEventListener('submit', function (e) {
+                    const role = form.querySelector('#role');
+                    const allowed = ['penyewa', 'tenant'];
+                    const val = role && role.value ? role.value.trim().toLowerCase() : '';
+                    if (!allowed.includes(val)) {
+                        e.preventDefault();
+                        alert('Role harus salah satu: penyewa atau tenant.');
+                        if (role) role.focus();
+                    }
+                });
+            });
+        </script>
+
         <!-- Name -->
         <div>
             <x-input-label for="name" :value="__('Name')" />
             <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
+        </div>
+
+        <!--role-->
+        <div class="mt-4">
+            <x-input-label for="role" :value="__('Role')" />
+            <select id="role" name="role" class="block mt-1 w-full rounded-md border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                <option value="penyewa" {{ old('role')=='penyewa' ? 'selected' : '' }}>Penyewa</option>
+                <option value="tenant" {{ old('role')=='tenant' ? 'selected' : '' }}>Tenant</option>
+            </select>
+            <x-input-error :messages="$errors->get('role')" class="mt-2" />
+        </div>
+
+        <!-- phone -->
+        <div class="mt-4">
+            <x-input-label for="phone" :value="__('Phone')" />
+            <x-text-input id="phone" class="block mt-1 w-full" type="number" name="phone" :value="old('phone')" required autofocus autocomplete="phone" />
+            <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+        </div>
+
+        <!-- Address -->
+        <div class="mt-4">
+            <x-input-label for="address" :value="__('Address')" />
+            <x-text-input id="address" class="block mt-1 w-full" type="text" name="address" :value="old('address')" required autofocus autocomplete="address" />
+            <x-input-error :messages="$errors->get('address')" class="mt-2" />
         </div>
 
         <!-- Email Address -->
