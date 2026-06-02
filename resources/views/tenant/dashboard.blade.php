@@ -65,7 +65,7 @@
         </a>
 
         <p class="nav-label mt-3">Akun</p>
-        <a href="profile" class="nav-item">
+        <a href="{{ route('profile.edit') }}" class="nav-item">
           <i class="bi bi-gear-fill"></i> Pengaturan
         </a>
       </nav>
