@@ -12,8 +12,10 @@ Route::get('/registered', function () {
 })->name('registered');
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+    Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->names('admin.users');
     Route::get('/dashboard-admin', function () {
+        return view('admin.dashboard'); // buat view admin/dashboard nanti
+    })->name('dashboard.admin');
         return view('admin.dashboard'); // buat view admin/dashboard nanti
     })->name('dashboard.admin');
 
@@ -36,4 +38,21 @@ Route::middleware(['auth', 'role:penyewa'])->group(function () {
 
     // route member lainnya
 });
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        $role = auth()->user()->role;
+
+        return redirect()->route(match ($role) {
+            'admin' => 'dashboard.admin',
+            'penyewa' => 'dashboard.penyewa',
+            default => 'dashboard.tenant',
+        });
+    })->name('dashboard');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
 require __DIR__.'/auth.php';

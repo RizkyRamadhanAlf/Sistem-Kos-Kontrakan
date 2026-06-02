@@ -13,6 +13,12 @@ class AdminSeed extends Seeder
      */
     public function run(): void
     {
+        if (! app()->isLocal()) {
+            return;
+        }
+
+        $plainPassword = env('ADMIN_PASSWORD', 'secret');
+
         User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
@@ -20,8 +26,9 @@ class AdminSeed extends Seeder
                 'phone' => '081234567890',
                 'address' => 'Admin Address',
                 'role' => 'admin',
-                'password' => Hash::make('secret'), // ganti password setelah deploy
+                'password' => Hash::make($plainPassword),
             ]
         );
+    }
     }
 }

@@ -28,26 +28,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $user = $request->user();
-        $role = $user?->role ?? 'member';
+        $request->authenticate();
 
-        // Pilih route tujuan berdasarkan role
-        if ($role === 'admin') {
-            $target = route('dashboard.admin', absolute: false);
-        } 
-        elseif ($role === 'tenant') {
-            // default untuk member/penyewa/tenant dsb.
-            $target = route('dashboard.tenant', absolute: false);
-        }
-        elseif ($role === 'penyewa') {
-            $target = route('dashboard.penyewa', absolute: false);
-        }
-        else {
-            $target = route('dashboard.tenant', absolute: false);
-        }
+        $request->session()->regenerate();
 
-        return redirect()->intended($target);
-    }
+        return redirect()->intended(route('dashboard', absolute: false));
 
     /**
      * Destroy an authenticated session.
