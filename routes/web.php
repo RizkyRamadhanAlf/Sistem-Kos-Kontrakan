@@ -36,4 +36,21 @@ Route::middleware(['auth', 'role:penyewa'])->group(function () {
 
     // route member lainnya
 });
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        $role = auth()->user()->role;
+
+        return redirect()->route(match ($role) {
+            'admin' => 'dashboard.admin',
+            'penyewa' => 'dashboard.penyewa',
+            default => 'dashboard.tenant',
+        });
+    })->name('dashboard');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
 require __DIR__.'/auth.php';
