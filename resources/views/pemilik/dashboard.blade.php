@@ -146,6 +146,51 @@
         </div>
       </div>
 
+      <div class="row g-4 mb-4">
+        <div class="col-12">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h6 class="panel-title">Kontrol Harga Kos</h6>
+                <p class="panel-sub">Atur harga sewa dan promo untuk setiap properti</p>
+              </div>
+              <button class="btn-add btn-sm"><i class="bi bi-pencil-fill"></i> Ubah Harga</button>
+            </div>
+            <div class="price-control">
+              <div class="table-responsive">
+                <table class="table table-borderless">
+                  <thead>
+                    <tr>
+                      <th>Properti</th>
+                      <th>Jenis</th>
+                      <th>Harga Saat Ini</th>
+                      <th>Diskon</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Kost Putri Melati</td>
+                      <td>Kost Putri</td>
+                      <td>Rp 1.200.000</td>
+                      <td>0%</td>
+                      <td><button class="btn btn-sm btn-outline-primary">Ubah Harga</button></td>
+                    </tr>
+                    <tr>
+                      <td>Kontrakan Griya Asri</td>
+                      <td>Kontrakan</td>
+                      <td>Rp 2.500.000</td>
+                      <td>10%</td>
+                      <td><button class="btn btn-sm btn-outline-primary">Ubah Harga</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ===================== MID ROW ===================== -->
       <div class="row g-4 mb-4">
 
