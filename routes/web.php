@@ -12,8 +12,10 @@ Route::get('/registered', function () {
 })->name('registered');
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+    Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->names('admin.users');
     Route::get('/dashboard-admin', function () {
+        return view('admin.dashboard'); // buat view admin/dashboard nanti
+    })->name('dashboard.admin');
         return view('admin.dashboard'); // buat view admin/dashboard nanti
     })->name('dashboard.admin');
 
