@@ -29,11 +29,11 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $request->authenticate();
-
+        
         $request->session()->regenerate();
-
+        
         return redirect()->intended(route('dashboard', absolute: false));
-
+    } // Added missing closing brace for the store method
     /**
      * Destroy an authenticated session.
      */

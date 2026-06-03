@@ -16,8 +16,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard-admin', function () {
         return view('admin.dashboard'); // buat view admin/dashboard nanti
     })->name('dashboard.admin');
-        return view('admin.dashboard'); // buat view admin/dashboard nanti
-    })->name('dashboard.admin');
 
     // contoh route lain khusus admin
     // Route::resource('admin/users', AdminUserController::class);
