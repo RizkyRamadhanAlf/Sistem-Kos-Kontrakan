@@ -6,7 +6,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('guest.home'); // buat view guest/home nanti
+    return view('index'); // buat view guest/home nanti
 });
 
 Route::get('/registered', function () {
