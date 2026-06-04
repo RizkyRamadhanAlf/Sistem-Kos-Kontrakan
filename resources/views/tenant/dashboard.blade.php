@@ -74,17 +74,14 @@
       <div class="sidebar-user">
         <img src="https://i.pravatar.cc/40?img=12" alt="avatar" class="user-avatar" />
         <div class="user-info">
-          <span class="user-name">Budi Santoso</span>
-          <span class="user-role">Pemilik</span>
+          <span class="user-name">{{ auth()->user()->name }}</span>
+          <span class="user-role">{{ auth()->user()->role }}</span>
         </div>
         <form method="POST" action="{{ route('logout') }}">
           @csrf
-
-          <x-responsive-nav-link :href="route('logout')"
-            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-            {{ __('Log Out') }}
-          </x-responsive-nav-link>
+          <button type="submit" class="btn btn-link p-0">
+            <i class="bi bi-box-arrow-right logout-icon"></i>
+          </button>
         </form>
       </div>
     </aside>
@@ -95,8 +92,8 @@
       <!-- Topbar -->
       <header class="topbar d-flex align-items-center justify-content-between">
         <div>
-          <h4 class="topbar-title">Selamat Datang, Budi 👋</h4>
-          <p class="topbar-sub">Kamis, 29 Mei 2025 · Ringkasan properti Anda hari ini</p>
+          <h4 class="topbar-title">Selamat Datang, {{ auth()->user()->name }} 👋</h4>
+          <p class="topbar-sub">{{ date('l, d F Y') }} · Ringkasan properti Anda hari ini</p>
         </div>
         <div class="topbar-actions d-flex align-items-center gap-3">
           <div class="search-box">

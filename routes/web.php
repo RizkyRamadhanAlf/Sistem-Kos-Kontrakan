@@ -4,6 +4,7 @@ use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Models\Role;
 
 Route::get('/', function () {
     return view('index'); // buat view guest/home nanti
@@ -31,24 +32,27 @@ Route::middleware(['auth', 'role:tenant'])->group(function () {
     // route member lainnya
 });
 
-Route::middleware(['auth', 'role:penyewa'])->group(function () {
-    Route::get('/dashboard-penyewa', function () {
-        return view('penyewa.dashboard'); // pakai view yang sudah ada
-    })->name('dashboard.penyewa');
+Route::middleware(['auth', 'role:owner'])->group(function () {
+    Route::get('/dashboard-owner', function () {
+        return view('owner.dashboard'); // pakai view yang sudah ada
+    })->name('dashboard.owner');
 
     // route member lainnya
 });
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
-        $role = auth()->user()->role;
+        $user = auth()->user();
 
-        return redirect()->route(match ($role) {
-            'admin' => 'dashboard.admin',
-            'penyewa' => 'dashboard.penyewa',
-            default => 'dashboard.tenant',
-        });
+        if ($user->hasRole('admin')) {
+            return redirect()->route('dashboard.admin');
+        } elseif ($user->hasRole('owner')) {
+            return redirect()->route('dashboard.owner');
+        } elseif ($user->hasRole('tenant')) {
+            return redirect()->route('dashboard.tenant');
+        }  return redirect()->route('dashboard.tenant'); // default ke tenant jika tidak ada role lain
     })->name('dashboard');
+
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

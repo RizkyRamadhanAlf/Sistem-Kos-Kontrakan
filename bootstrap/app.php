@@ -15,7 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.basic' => Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
             'cache.headers' => Illuminate\Http\Middleware\SetCacheHeaders::class,
             'can' => Illuminate\Auth\Middleware\Authorize::class,
-            'role' => App\Http\Middleware\RoleMiddleware::class,
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
