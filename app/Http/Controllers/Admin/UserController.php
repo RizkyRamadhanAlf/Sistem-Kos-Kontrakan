@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -19,7 +20,8 @@ class UserController extends Controller
 
     public function create(): View
     {
-        return view('admin.users.create');
+        $roles = Role::all();  //ambil semua role untuk dropdown
+        return view('admin.users.create', compact('roles'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -29,13 +31,14 @@ class UserController extends Controller
             'email' => ['required','email','max:255','unique:users'],
             'phone' => ['nullable','string','max:255','unique:users'],
             'address' => ['nullable','string','max:255'],
-            'role' => ['required','string','in:admin,member,penyewa,tenant'],
+            'role' => ['required','string','exists:roles,name'],
             'password' => ['required','string','min:8','confirmed'],
         ]);
 
         $data['password'] = Hash::make($data['password']);
 
-        User::create($data);
+        $user = User::create($data);
+        $user->assignRole($data['role']);
 
         return redirect()->route('admin.users.index')->with('success', 'User created.');
     }
@@ -47,7 +50,8 @@ class UserController extends Controller
 
     public function edit(User $user): View
     {
-        return view('admin.users.edit', compact('user'));
+        $roles = Role::all();  //ambil semua role untuk dropdown
+        return view('admin.users.edit', compact('user', 'roles'));
     }
 
     public function update(Request $request, User $user): RedirectResponse
@@ -57,7 +61,7 @@ class UserController extends Controller
             'email' => ['required','email','max:255',"unique:users,email,{$user->id}"],
             'phone' => ["nullable","string","max:255","unique:users,phone,{$user->id}"],
             'address' => ['nullable','string','max:255'],
-            'role' => ['required','string','in:admin,member,penyewa,tenant'],
+            'role' => ['required','string','exists:roles,name'],
             'password' => ['nullable','string','min:8','confirmed'],
         ]);
 
@@ -68,6 +72,7 @@ class UserController extends Controller
         }
 
         $user->update($data);
+        $user->syncRoles($request->role);
 
         return redirect()->route('admin.users.index')->with('success', 'User updated.');
     }
