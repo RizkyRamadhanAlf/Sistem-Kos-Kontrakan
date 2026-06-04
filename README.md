@@ -1,59 +1,76 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Kos & Kontrakan 🏠
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Platform manajemen penyewaan properti (Kos/Kontrakan) yang dibangun menggunakan Laravel. Aplikasi ini dirancang untuk mempermudah Pemilik (Owner) dalam mengelola unit dan pembayaran, serta mempermudah Penyewa (Tenant) dalam melakukan pelaporan maintenance dan konfirmasi pembayaran.
 
-## About Laravel
+## 🚀 Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Multi-Role Authentication**: Mendukung 3 level pengguna (Admin, Owner, Tenant) menggunakan **Spatie Laravel Permission**.
+- **Dashboard Terpisah**: Tampilan dashboard yang dipersonalisasi sesuai dengan role masing-masing.
+- **Manajemen Pembayaran**: Tenant dapat mengunggah bukti pembayaran, dan Owner dapat memverifikasi secara real-time.
+- **Layanan Maintenance**: Tenant dapat mengajukan permintaan perbaikan unit melalui sistem.
+- **Manajemen Pengguna**: Admin memiliki kendali penuh untuk mengelola akun pengguna di dalam sistem.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🛠️ Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Framework**: [Laravel 12](https://laravel.com)
+- **Database**: MySQL / SQLite
+- **Role Management**: [Spatie Laravel Permission](https://spatie.be/docs/laravel-permission/v6/introduction)
+- **Frontend**: Blade Templating, Tailwind CSS, Alpine.js (Laravel Breeze)
+- **Auth**: Laravel Breeze (Session Based)
 
-## Learning Laravel
+## 📋 Persyaratan Sistem
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- PHP >= 8.2
+- Composer
+- Node.js & NPM
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## ⚙️ Instalasi
 
-## Laravel Sponsors
+1. **Clone Repository**
+   ```bash
+   git clone https://github.com/username/sistem-kos-kontrakan.git
+   cd sistem-kos-kontrakan
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2. **Instal Dependensi**
+   ```bash
+   composer install
+   npm install && npm run build
+   ```
 
-### Premium Partners
+3. **Konfigurasi Environment**
+   Salin file `.env.example` menjadi `.env` dan sesuaikan pengaturan database Anda.
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+4. **Migrasi Database & Seeding**
+   Jalankan migrasi untuk membuat tabel dan seeder untuk membuat Role serta akun Admin default.
+   ```bash
+   php artisan migrate --seed
+   ```
 
-## Contributing
+## 🔐 Konfigurasi Role (Spatie)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Aplikasi ini menggunakan sistem Role-Based Access Control (RBAC). Daftar Role yang tersedia:
 
-## Code of Conduct
+- `admin`: Manajemen penuh sistem dan pengguna.
+- `owner`: Mengelola unit kos, memverifikasi pembayaran, dan mengelola maintenance.
+- `tenant`: Melakukan pembayaran dan mengajukan maintenance.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Untuk memberikan role secara manual via Tinker:
+```php
+$user = User::find(1);
+$user->assignRole('admin');
+```
 
-## Security Vulnerabilities
+## 📁 Struktur Folder Penting
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- `app/Http/Controllers/Auth`: Logika registrasi dan login (dengan assign role otomatis).
+- `database/seeders/RolesSeed.php`: Konfigurasi awal Role dan akun Admin.
+- `resources/views/layouts/navigation.blade.php`: Navigasi dinamis berbasis role.
 
-## License
+## 📄 Lisensi
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Proyek ini dikembangkan untuk tujuan pembelajaran dan manajemen internal. Silakan hubungi pengembang untuk informasi lebih lanjut.
