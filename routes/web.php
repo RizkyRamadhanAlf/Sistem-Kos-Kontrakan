@@ -68,6 +68,8 @@ Route::middleware(['auth', 'role:penyewa'])->group(function () {
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
     Route::get('/booking/{booking}/pembayaran', [PaymentController::class, 'showBookingPayment'])->name('booking.payment.show');
     Route::post('/booking/{booking}/pembayaran/snap', [PaymentController::class, 'createSnapToken'])->name('booking.payment.snap');
+    Route::post('/booking/{booking}/batalkan', [PaymentController::class, 'cancelBooking'])->name('booking.cancel');
+    Route::post('/booking/{booking}/kedaluwarsa', [PaymentController::class, 'expireBooking'])->name('booking.expire');
 
     Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
     Route::post('/maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');

@@ -30,6 +30,7 @@ class Booking extends Model
         'booking_date' => 'datetime',
         'check_in_date' => 'date',
         'check_out_date' => 'date',
+        'duration_months' => 'integer',
         'price_per_month' => 'decimal:2',
         'admin_fee' => 'decimal:2',
         'total_amount' => 'decimal:2',

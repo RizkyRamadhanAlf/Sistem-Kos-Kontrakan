@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class BookingController extends Controller
 {
@@ -19,13 +20,16 @@ class BookingController extends Controller
             'room_type' => 'required|string|max:255',
             'location' => 'required|string|max:255',
             'tenant_name' => 'required|string|max:255',
-            'duration_months' => 'required|integer|min:1',
+            'duration_months' => 'required|integer|min:1|max:24',
             'price_per_month' => 'required|numeric|min:0',
-            'booking_date' => 'required|date',
+            'booking_date' => 'required|date|after_or_equal:today',
         ]);
 
+        $durationMonths = (int) $validated['duration_months'];
+        $pricePerMonth = (int) $validated['price_per_month'];
+        $checkInDate = Carbon::parse($validated['booking_date']);
         $adminFee = 5000; // Contoh biaya admin tetap
-        $totalAmount = ($validated['price_per_month'] * $validated['duration_months']) + $adminFee;
+        $totalAmount = ($pricePerMonth * $durationMonths) + $adminFee;
 
         $booking = Booking::create([
             'user_id' => auth()->id(),
@@ -34,8 +38,10 @@ class BookingController extends Controller
             'location' => $validated['location'],
             'tenant_name' => $validated['tenant_name'],
             'booking_date' => $validated['booking_date'],
-            'duration_months' => $validated['duration_months'],
-            'price_per_month' => $validated['price_per_month'],
+            'check_in_date' => $checkInDate,
+            'check_out_date' => $checkInDate->copy()->addMonths($durationMonths),
+            'duration_months' => $durationMonths,
+            'price_per_month' => $pricePerMonth,
             'admin_fee' => $adminFee,
             'total_amount' => $totalAmount,
             'status' => Booking::STATUS_PENDING,

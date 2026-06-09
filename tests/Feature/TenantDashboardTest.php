@@ -59,7 +59,7 @@ class TenantDashboardTest extends TestCase
         $this->actingAs($tenant)->post(route('tenant.booking.create', $property), [
             'room_id' => $room->id,
             'check_in_date' => now()->addDay()->toDateString(),
-            'duration_months' => 3,
+            'duration_months' => '3',
         ])->assertRedirect();
 
         $this->assertDatabaseHas('bookings', [
@@ -68,5 +68,38 @@ class TenantDashboardTest extends TestCase
             'total_amount' => 3025000,
             'status' => Booking::STATUS_PENDING,
         ]);
+
+        $booking = Booking::where('user_id', $tenant->id)->firstOrFail();
+        $this->assertSame(
+            now()->addDay()->addMonths(3)->toDateString(),
+            $booking->check_out_date->toDateString()
+        );
+    }
+
+    public function test_tenant_booking_duration_must_be_a_positive_integer(): void
+    {
+        $tenant = User::factory()->create(['role' => 'penyewa']);
+        $owner = User::factory()->create(['role' => 'tenant']);
+        $property = Property::create([
+            'owner_id' => $owner->id,
+            'name' => 'Kos Uji Validasi',
+            'location' => 'Jakarta',
+            'status' => 'active',
+        ]);
+        $room = Room::create([
+            'property_id' => $property->id,
+            'room_number' => '102',
+            'room_type' => 'Standar',
+            'price_per_month' => 1000000,
+            'status' => 'available',
+        ]);
+
+        $this->actingAs($tenant)->post(route('tenant.booking.create', $property), [
+            'room_id' => $room->id,
+            'check_in_date' => now()->addDay()->toDateString(),
+            'duration_months' => '2.5',
+        ])->assertSessionHasErrors('duration_months');
+
+        $this->assertDatabaseCount('bookings', 0);
     }
 }

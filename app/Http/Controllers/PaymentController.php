@@ -95,7 +95,32 @@ class PaymentController extends Controller
     {
         $this->authorize('view', $booking);
         $booking->load('room.property');
-        $payment = Payment::where('booking_id', $booking->id)->first();
+        $payment = Payment::firstOrCreate(
+            ['booking_id' => $booking->id],
+            [
+                'user_id' => $booking->user_id,
+                'invoice_number' => 'INV-'.now()->timestamp.'-'.random_int(100, 999),
+                'tenant_name' => $booking->tenant_name,
+                'gross_amount' => $booking->total_amount,
+                'amount' => $booking->total_amount,
+                'payment_date' => now(),
+                'payment_status' => Payment::STATUS_PENDING,
+                'status' => Payment::STATUS_PENDING,
+                'expired_at' => now()->addDay(),
+            ]
+        );
+
+        if ($payment->payment_status === Payment::STATUS_PENDING && ! $payment->expired_at) {
+            $payment->update(['expired_at' => now()->addDay()]);
+        }
+
+        if ($payment->payment_status === Payment::STATUS_PENDING && $payment->expired_at?->isPast()) {
+            $payment->update([
+                'payment_status' => Payment::STATUS_EXPIRED,
+                'status' => Payment::STATUS_EXPIRED,
+            ]);
+            $booking->update(['status' => Booking::STATUS_EXPIRED]);
+        }
 
         $clientKey = config('midtrans.client_key');
         $isProduction = config('midtrans.is_production');
@@ -109,6 +134,9 @@ class PaymentController extends Controller
     public function createSnapToken(Request $request, Booking $booking)
     {
         $this->authorize('view', $booking);
+        $validated = $request->validate([
+            'method' => ['nullable', 'string', 'max:100'],
+        ]);
 
         // prevent paying already paid bookings
         if ($booking->status === Booking::STATUS_PAID) {
@@ -116,9 +144,18 @@ class PaymentController extends Controller
         }
 
         $existing = Payment::where('booking_id', $booking->id)->first();
+        if ($booking->status === Booking::STATUS_CANCELLED) {
+            return response()->json(['error' => 'Booking sudah dibatalkan'], 422);
+        }
+        if ($existing?->expired_at?->isPast() || $booking->status === Booking::STATUS_EXPIRED) {
+            return response()->json(['error' => 'Batas waktu pembayaran telah berakhir'], 422);
+        }
 
         // compute total
-        $gross = (int) ($booking->total_amount ?? (($booking->price_per_month ?? 0) * ($booking->duration_months ?? 1)) + ($booking->admin_fee ?? 0));
+        $durationMonths = (int) ($booking->duration_months ?? 1);
+        $pricePerMonth = (int) ($booking->price_per_month ?? 0);
+        $adminFee = (int) ($booking->admin_fee ?? 0);
+        $gross = (int) ($booking->total_amount ?? ($pricePerMonth * $durationMonths) + $adminFee);
 
         $invoice = 'INV-'.time().'-'.rand(100, 999);
         $orderId = 'ORDER-'.time().'-'.rand(100, 999);
@@ -170,6 +207,8 @@ class PaymentController extends Controller
                 'payment_status' => Payment::STATUS_PENDING,
                 'status' => Payment::STATUS_PENDING,
                 'snap_token' => $snapToken,
+                'expired_at' => now()->addDay(),
+                'payment_method' => $validated['method'] ?? null,
             ]);
         } else {
             $existing->update([
@@ -181,11 +220,41 @@ class PaymentController extends Controller
                 'payment_date' => now(),
                 'order_id' => $orderId,
                 'invoice_number' => $invoice,
+                'payment_method' => $validated['method'] ?? $existing->payment_method,
             ]);
             $payment = $existing;
         }
 
         return response()->json(['token' => $snapToken, 'payment' => $payment]);
+    }
+
+    public function cancelBooking(Booking $booking)
+    {
+        $this->authorize('update', $booking);
+
+        $booking->update(['status' => Booking::STATUS_CANCELLED]);
+        $booking->payment?->update([
+            'payment_status' => Payment::STATUS_FAILED,
+            'status' => Payment::STATUS_FAILED,
+        ]);
+
+        return redirect()->route('tenant.bookings')->with('success', 'Booking berhasil dibatalkan.');
+    }
+
+    public function expireBooking(Booking $booking)
+    {
+        $this->authorize('update', $booking);
+        $payment = $booking->payment;
+
+        if ($payment?->payment_status === Payment::STATUS_PENDING && $payment->expired_at?->isPast()) {
+            $payment->update([
+                'payment_status' => Payment::STATUS_EXPIRED,
+                'status' => Payment::STATUS_EXPIRED,
+            ]);
+            $booking->update(['status' => Booking::STATUS_EXPIRED]);
+        }
+
+        return response()->noContent();
     }
 
     /**

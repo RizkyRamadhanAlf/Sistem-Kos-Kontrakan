@@ -378,8 +378,9 @@ class TenantDashboardController extends Controller
             ->whereKey($validated['room_id'])
             ->where('status', 'available')
             ->firstOrFail();
+        $durationMonths = (int) $validated['duration_months'];
         $adminFee = 25000;
-        $total = ((int) $room->price_per_month * $validated['duration_months']) + $adminFee;
+        $total = ((int) $room->price_per_month * $durationMonths) + $adminFee;
 
         $booking = Auth::user()->bookings()->create([
             'room_id' => $room->id,
@@ -389,8 +390,8 @@ class TenantDashboardController extends Controller
             'tenant_name' => Auth::user()->name,
             'booking_date' => now(),
             'check_in_date' => $validated['check_in_date'],
-            'check_out_date' => Carbon::parse($validated['check_in_date'])->addMonths($validated['duration_months']),
-            'duration_months' => $validated['duration_months'],
+            'check_out_date' => Carbon::parse($validated['check_in_date'])->addMonths($durationMonths),
+            'duration_months' => $durationMonths,
             'price_per_month' => $room->price_per_month,
             'admin_fee' => $adminFee,
             'total_amount' => $total,
