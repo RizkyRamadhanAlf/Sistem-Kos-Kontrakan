@@ -10,12 +10,22 @@ class Payment extends Model
     use HasFactory;
 
     public const STATUS_PENDING = 'pending';
-    public const STATUS_VERIFIED = 'verified';
-    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_PAID = 'paid';
+    public const STATUS_FAILED = 'failed';
+    public const STATUS_EXPIRED = 'expired';
 
     protected $fillable = [
+        'booking_id',
+        'invoice_number',
+        'order_id',
         'tenant_name',
+        'gross_amount',
         'amount',
+        'payment_method',
+        'payment_status',
+        'snap_token',
+        'paid_at',
+        'expired_at',
         'payment_date',
         'receipt_path',
         'status',
@@ -26,5 +36,9 @@ class Payment extends Model
     protected $casts = [
         'payment_date' => 'date',
         'verified_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'expired_at' => 'datetime',
+        'gross_amount' => 'decimal:2',
+        'amount' => 'decimal:2',
     ];
 }

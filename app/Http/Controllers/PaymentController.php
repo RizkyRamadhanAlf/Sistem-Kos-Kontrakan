@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+
+// Midtrans SDK (optional, requires composer require midtrans/midtrans)
+use Midtrans\Config as MidtransConfig;
+use Midtrans\Snap as MidtransSnap;
 
 class PaymentController extends Controller
 {
@@ -60,15 +65,155 @@ class PaymentController extends Controller
     {
         $action = $request->input('action');
 
-        if (!in_array($action, [Payment::STATUS_VERIFIED, Payment::STATUS_REJECTED], true)) {
+        $allowed = [Payment::STATUS_PAID, Payment::STATUS_FAILED, Payment::STATUS_EXPIRED, Payment::STATUS_PENDING];
+        if (!in_array($action, $allowed, true)) {
             return redirect()->route('pembayaran.verifikasi')->with('error', 'Aksi verifikasi tidak valid.');
         }
 
-        $payment->status = $action;
+        $payment->payment_status = $action;
         $payment->notes = $request->input('notes');
-        $payment->verified_at = now();
+        if ($action === Payment::STATUS_PAID) {
+            $payment->paid_at = now();
+        }
         $payment->save();
 
+        // update related booking if exists
+        if ($payment->booking_id) {
+            $booking = Booking::find($payment->booking_id);
+            if ($booking && $action === Payment::STATUS_PAID) {
+                $booking->status = Booking::STATUS_PAID;
+                $booking->save();
+            }
+        }
+
         return redirect()->route('pembayaran.verifikasi')->with('success', 'Status pembayaran berhasil diperbarui.');
+    }
+
+    /**
+     * Show payment page for a booking
+     */
+    public function showBookingPayment(Booking $booking)
+    {
+        $payment = Payment::where('booking_id', $booking->id)->first();
+
+        $clientKey = env('MIDTRANS_CLIENT_KEY');
+
+        return view('pembayaran.booking', compact('booking', 'payment', 'clientKey'));
+    }
+
+    /**
+     * Create Snap token for a booking
+     */
+    public function createSnapToken(Request $request, Booking $booking)
+    {
+        // prevent paying already paid bookings
+        if ($booking->status === Booking::STATUS_PAID) {
+            return response()->json(['error' => 'Booking sudah dibayar'], 422);
+        }
+
+        $existing = Payment::where('booking_id', $booking->id)->first();
+
+        // compute total
+        $gross = $booking->total_amount ?? (($booking->price_per_month ?? 0) * ($booking->duration_months ?? 1)) + ($booking->admin_fee ?? 0);
+
+        $invoice = 'INV-' . time() . '-' . rand(100, 999);
+        $orderId = 'ORDER-' . time() . '-' . rand(100, 999);
+
+        // prepare Midtrans
+        MidtransConfig::$serverKey = env('MIDTRANS_SERVER_KEY');
+        MidtransConfig::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $orderId,
+                'gross_amount' => (int) $gross,
+            ],
+            'customer_details' => [
+                'first_name' => $booking->tenant_name ?? 'Tamu',
+            ],
+        ];
+
+        try {
+            $snapToken = MidtransSnap::getSnapToken($params);
+        } catch (\Throwable $e) {
+            return response()->json(['error' => 'Gagal membuat snap token: ' . $e->getMessage()], 500);
+        }
+
+        if (!$existing) {
+            $payment = Payment::create([
+                'booking_id' => $booking->id,
+                'invoice_number' => $invoice,
+                'order_id' => $orderId,
+                'tenant_name' => $booking->tenant_name,
+                'gross_amount' => $gross,
+                'payment_status' => Payment::STATUS_PENDING,
+                'snap_token' => $snapToken,
+            ]);
+        } else {
+            $existing->snap_token = $snapToken;
+            $existing->payment_status = Payment::STATUS_PENDING;
+            $existing->gross_amount = $gross;
+            $existing->order_id = $orderId;
+            $existing->invoice_number = $invoice;
+            $existing->save();
+            $payment = $existing;
+        }
+
+        return response()->json(['token' => $snapToken, 'payment' => $payment]);
+    }
+
+    /**
+     * Handle Midtrans notification / webhook
+     */
+    public function webhook(Request $request)
+    {
+        $orderId = $request->input('order_id') ?? $request->input('order_id');
+        $transactionStatus = $request->input('transaction_status') ?? $request->input('transaction_status');
+
+        $payment = Payment::where('order_id', $orderId)->orWhere('invoice_number', $orderId)->first();
+        if (!$payment) {
+            return response('OK', 200);
+        }
+
+        switch ($transactionStatus) {
+            case 'capture':
+            case 'settlement':
+                $payment->payment_status = Payment::STATUS_PAID;
+                $payment->paid_at = now();
+                break;
+            case 'deny':
+            case 'failure':
+                $payment->payment_status = Payment::STATUS_FAILED;
+                break;
+            case 'expire':
+                $payment->payment_status = Payment::STATUS_EXPIRED;
+                $payment->expired_at = now();
+                break;
+            default:
+                $payment->payment_status = $transactionStatus;
+                break;
+        }
+
+        $payment->save();
+
+        if ($payment->booking_id && $payment->payment_status === Payment::STATUS_PAID) {
+            $booking = Booking::find($payment->booking_id);
+            if ($booking) {
+                $booking->status = Booking::STATUS_PAID;
+                $booking->save();
+            }
+        }
+
+        return response('OK', 200);
+    }
+
+    public function success()
+    {
+        return view('pembayaran.success');
+    }
+
+    public function fail()
+    {
+        return view('pembayaran.fail');
     }
 }
