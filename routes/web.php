@@ -62,7 +62,16 @@ Route::post('/pembayaran', [PaymentController::class, 'store'])->name('pembayara
 Route::get('/pembayaran/verifikasi', [PaymentController::class, 'verifyIndex'])->name('pembayaran.verifikasi');
 Route::post('/pembayaran/{payment}/verifikasi', [PaymentController::class, 'verify'])->name('pembayaran.verify');
 
+<<<<<<< HEAD
 Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
 Route::post('/maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');
 Route::get('/pemilik/maintenance', [MaintenanceController::class, 'manageIndex'])->name('pemilik.maintenance');
 Route::post('/pemilik/maintenance/{maintenance}/status', [MaintenanceController::class, 'updateStatus'])->name('pemilik.maintenance.status');
+=======
+// Booking payment routes
+Route::get('/booking/{booking}/pembayaran', [PaymentController::class, 'showBookingPayment'])->name('booking.payment.show');
+Route::post('/booking/{booking}/pembayaran/snap', [PaymentController::class, 'createSnapToken'])->name('booking.payment.snap');
+Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->name('payments.webhook');
+Route::get('/payments/success', [PaymentController::class, 'success'])->name('payments.success');
+Route::get('/payments/fail', [PaymentController::class, 'fail'])->name('payments.fail');
+>>>>>>> feature/m3-pembayaran
