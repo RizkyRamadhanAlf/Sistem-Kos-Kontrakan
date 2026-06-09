@@ -22,6 +22,10 @@
                 Edit
             </a>
 
+            <a href="{{ route('kost.show', $kost->id) }}">
+                Detail
+            </a>
+
             <form action="{{ route('kost.destroy', $kost->id) }}"
                   method="POST"
                   style="display:inline;">
