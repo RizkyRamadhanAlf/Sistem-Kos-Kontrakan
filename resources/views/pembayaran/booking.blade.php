@@ -62,8 +62,14 @@
                   <span class="badge bg-info">{{ $status }}</span>
                 @endif
               </p>
-              <p class="mb-1"><strong>Batas waktu pembayaran:</strong> {{ optional($payment->expired_at)->format('d M Y H:i') ?? '-' }}</p>
-              <p class="mb-1"><strong>Total tagihan:</strong> <span class="fs-4 text-danger">Rp {{ number_format($payment->gross_amount ?? $booking->total_amount,0,',','.') }}</span></p>
+              <p class="mb-1"><strong>Batas waktu pembayaran:</strong>
+                @if($payment && $payment->expired_at)
+                  {{ $payment->expired_at->format('d M Y H:i') }}
+                @else
+                  -
+                @endif
+              </p>
+              <p class="mb-1"><strong>Total tagihan:</strong> <span class="fs-4 text-danger">Rp {{ number_format(($payment->gross_amount ?? $booking->total_amount), 0, ',', '.') }}</span></p>
             </div>
           </div>
         </div>
@@ -123,8 +129,11 @@
       <script>
         const bookingId = {{ $booking->id }};
         const payBtn = document.getElementById('payNow');
+        const methodCards = document.querySelectorAll('.payment-method');
 
-        payBtn.addEventListener('click', async function () {
+        async function startPayment() {
+          if (payBtn.disabled) return;
+
           payBtn.disabled = true;
           payBtn.innerText = 'Membuat Transaksi...';
 
@@ -168,6 +177,11 @@
             payBtn.disabled = false;
             payBtn.innerText = 'Bayar Sekarang';
           }
+        }
+
+        payBtn.addEventListener('click', startPayment);
+        methodCards.forEach(card => {
+          card.addEventListener('click', startPayment);
         });
       </script>
     </div>
