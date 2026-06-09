@@ -95,8 +95,7 @@ class PaymentController extends Controller
     public function showBookingPayment(Booking $booking)
     {
         $payment = Payment::where('booking_id', $booking->id)->first();
-
-        $clientKey = env('MIDTRANS_CLIENT_KEY');
+        $clientKey = config('midtrans.client_key');
 
         return view('pembayaran.booking', compact('booking', 'payment', 'clientKey'));
     }
@@ -114,22 +113,32 @@ class PaymentController extends Controller
         $existing = Payment::where('booking_id', $booking->id)->first();
 
         // compute total
-        $gross = $booking->total_amount ?? (($booking->price_per_month ?? 0) * ($booking->duration_months ?? 1)) + ($booking->admin_fee ?? 0);
+        $gross = (int) ($booking->total_amount ?? (($booking->price_per_month ?? 0) * ($booking->duration_months ?? 1)) + ($booking->admin_fee ?? 0));
 
         $invoice = 'INV-' . time() . '-' . rand(100, 999);
         $orderId = 'ORDER-' . time() . '-' . rand(100, 999);
 
         // prepare Midtrans
-        MidtransConfig::$serverKey = env('MIDTRANS_SERVER_KEY');
-        MidtransConfig::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
+        MidtransConfig::$serverKey = config('midtrans.server_key');
+        MidtransConfig::$isProduction = config('midtrans.is_production');
+        MidtransConfig::$isSanitized = config('midtrans.is_sanitized');
+        MidtransConfig::$is3ds = config('midtrans.is_3ds');
 
         $params = [
             'transaction_details' => [
                 'order_id' => $orderId,
-                'gross_amount' => (int) $gross,
+                'gross_amount' => $gross,
             ],
             'customer_details' => [
                 'first_name' => $booking->tenant_name ?? 'Tamu',
+            ],
+            'item_details' => [
+                [
+                    'id' => 'KOS-' . $booking->id,
+                    'price' => $gross,
+                    'quantity' => 1,
+                    'name' => 'Pembayaran Kos: ' . ($booking->kos_name ?? 'Kos'),
+                ]
             ],
         ];
 
@@ -146,16 +155,23 @@ class PaymentController extends Controller
                 'order_id' => $orderId,
                 'tenant_name' => $booking->tenant_name,
                 'gross_amount' => $gross,
+                'amount' => $gross,
+                'payment_date' => now(),
                 'payment_status' => Payment::STATUS_PENDING,
+                'status' => Payment::STATUS_PENDING,
                 'snap_token' => $snapToken,
             ]);
         } else {
-            $existing->snap_token = $snapToken;
-            $existing->payment_status = Payment::STATUS_PENDING;
-            $existing->gross_amount = $gross;
-            $existing->order_id = $orderId;
-            $existing->invoice_number = $invoice;
-            $existing->save();
+            $existing->update([
+                'snap_token' => $snapToken,
+                'payment_status' => Payment::STATUS_PENDING,
+                'status' => Payment::STATUS_PENDING,
+                'gross_amount' => $gross,
+                'amount' => $gross,
+                'payment_date' => now(),
+                'order_id' => $orderId,
+                'invoice_number' => $invoice,
+            ]);
             $payment = $existing;
         }
 
@@ -167,33 +183,55 @@ class PaymentController extends Controller
      */
     public function webhook(Request $request)
     {
-        $orderId = $request->input('order_id') ?? $request->input('order_id');
-        $transactionStatus = $request->input('transaction_status') ?? $request->input('transaction_status');
+        $serverKey = config('midtrans.server_key');
+        $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
+        
+        if ($hashed !== $request->signature_key) {
+            return response()->json(['message' => 'Invalid signature'], 403);
+        }
 
-        $payment = Payment::where('order_id', $orderId)->orWhere('invoice_number', $orderId)->first();
+        $orderId = $request->order_id;
+        $transactionStatus = $request->transaction_status;
+        $type = $request->payment_type;
+
+        $payment = Payment::where('order_id', $orderId)->first();
         if (!$payment) {
-            return response('OK', 200);
+            return response()->json(['message' => 'Payment not found'], 404);
         }
 
-        switch ($transactionStatus) {
-            case 'capture':
-            case 'settlement':
-                $payment->payment_status = Payment::STATUS_PAID;
-                $payment->paid_at = now();
-                break;
-            case 'deny':
-            case 'failure':
-                $payment->payment_status = Payment::STATUS_FAILED;
-                break;
-            case 'expire':
-                $payment->payment_status = Payment::STATUS_EXPIRED;
-                $payment->expired_at = now();
-                break;
-            default:
-                $payment->payment_status = $transactionStatus;
-                break;
+        if ($transactionStatus == 'capture') {
+            if ($type == 'credit_card') {
+                if ($request->fraud_status == 'challenge') {
+                    $payment->payment_status = 'challenge';
+                } else {
+                    $payment->payment_status = Payment::STATUS_PAID;
+                    $payment->status = Payment::STATUS_PAID;
+                }
+            }
+        } else if ($transactionStatus == 'settlement') {
+            $payment->payment_status = Payment::STATUS_PAID;
+            $payment->status = Payment::STATUS_PAID;
+        } else if ($transactionStatus == 'pending') {
+            $payment->payment_status = Payment::STATUS_PENDING;
+            $payment->status = Payment::STATUS_PENDING;
+        } else if ($transactionStatus == 'deny') {
+            $payment->payment_status = Payment::STATUS_FAILED;
+            $payment->status = Payment::STATUS_FAILED;
+        } else if ($transactionStatus == 'expire') {
+            $payment->payment_status = Payment::STATUS_EXPIRED;
+            $payment->status = Payment::STATUS_EXPIRED;
+            $payment->expired_at = now();
+        } else if ($transactionStatus == 'cancel') {
+            $payment->payment_status = Payment::STATUS_FAILED;
+            $payment->status = Payment::STATUS_FAILED;
         }
 
+        $payment->payment_method = $type;
+        if ($payment->payment_status === Payment::STATUS_PAID) {
+            $payment->paid_at = now();
+            $payment->verified_at = now();
+        }
+        
         $payment->save();
 
         if ($payment->booking_id && $payment->payment_status === Payment::STATUS_PAID) {
@@ -204,7 +242,7 @@ class PaymentController extends Controller
             }
         }
 
-        return response('OK', 200);
+        return response()->json(['message' => 'Webhook received']);
     }
 
     public function success()

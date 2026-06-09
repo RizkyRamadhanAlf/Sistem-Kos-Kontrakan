@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
@@ -23,9 +24,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Route::resource('admin/users', AdminUserController::class);
 });
 
+Route::middleware(['auth'])->group(function () {
+    // Booking routes for all authenticated users
+    Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
+    Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+});
+
 Route::middleware(['auth', 'role:tenant'])->group(function () {
     Route::get('/dashboard-tenant', function () {
-        return view('tenant.dashboard'); // pakai view yang sudah ada
+        $bookings = \App\Models\Booking::where('user_id', auth()->id())->latest()->get();
+        $payments = \App\Models\Payment::whereIn('booking_id', $bookings->pluck('id'))->latest()->get();
+        return view('tenant.dashboard', compact('bookings', 'payments'));
     })->name('dashboard.tenant');
 
     // route member lainnya
@@ -62,16 +71,14 @@ Route::post('/pembayaran', [PaymentController::class, 'store'])->name('pembayara
 Route::get('/pembayaran/verifikasi', [PaymentController::class, 'verifyIndex'])->name('pembayaran.verifikasi');
 Route::post('/pembayaran/{payment}/verifikasi', [PaymentController::class, 'verify'])->name('pembayaran.verify');
 
-<<<<<<< HEAD
 Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
 Route::post('/maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');
 Route::get('/pemilik/maintenance', [MaintenanceController::class, 'manageIndex'])->name('pemilik.maintenance');
 Route::post('/pemilik/maintenance/{maintenance}/status', [MaintenanceController::class, 'updateStatus'])->name('pemilik.maintenance.status');
-=======
+
 // Booking payment routes
 Route::get('/booking/{booking}/pembayaran', [PaymentController::class, 'showBookingPayment'])->name('booking.payment.show');
 Route::post('/booking/{booking}/pembayaran/snap', [PaymentController::class, 'createSnapToken'])->name('booking.payment.snap');
 Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->name('payments.webhook');
 Route::get('/payments/success', [PaymentController::class, 'success'])->name('payments.success');
 Route::get('/payments/fail', [PaymentController::class, 'fail'])->name('payments.fail');
->>>>>>> feature/m3-pembayaran

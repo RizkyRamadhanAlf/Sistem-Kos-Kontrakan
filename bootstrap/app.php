@@ -11,6 +11,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->validateCsrfTokens(except: [
+            'payments/webhook',
+        ]);
         $middleware->alias([
             'auth.basic' => Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
             'cache.headers' => Illuminate\Http\Middleware\SetCacheHeaders::class,
