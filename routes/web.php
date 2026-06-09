@@ -3,6 +3,7 @@
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\KostController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -54,6 +55,24 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::get('/kost', [KostController::class, 'index'])
+    ->name('kost.index');
+
+Route::get('/kost/create', [KostController::class, 'create'])
+    ->name('kost.create');
+
+Route::post('/kost', [KostController::class, 'store'])
+    ->name('kost.store');
+
+Route::get('/kost/{kost}/edit', [KostController::class, 'edit'])
+    ->name('kost.edit');
+
+Route::put('/kost/{kost}', [KostController::class, 'update'])
+    ->name('kost.update');
+
+Route::delete('/kost/{kost}', [KostController::class, 'destroy'])
+    ->name('kost.destroy');
 
 require __DIR__.'/auth.php';
 
