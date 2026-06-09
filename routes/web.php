@@ -15,3 +15,10 @@ Route::get('/pembayaran', [PaymentController::class, 'index'])->name('pembayaran
 Route::post('/pembayaran', [PaymentController::class, 'store'])->name('pembayaran.upload.store');
 Route::get('/pembayaran/verifikasi', [PaymentController::class, 'verifyIndex'])->name('pembayaran.verifikasi');
 Route::post('/pembayaran/{payment}/verifikasi', [PaymentController::class, 'verify'])->name('pembayaran.verify');
+
+// Booking payment routes
+Route::get('/booking/{booking}/pembayaran', [PaymentController::class, 'showBookingPayment'])->name('booking.payment.show');
+Route::post('/booking/{booking}/pembayaran/snap', [PaymentController::class, 'createSnapToken'])->name('booking.payment.snap');
+Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->name('payments.webhook');
+Route::get('/payments/success', [PaymentController::class, 'success'])->name('payments.success');
+Route::get('/payments/fail', [PaymentController::class, 'fail'])->name('payments.fail');
