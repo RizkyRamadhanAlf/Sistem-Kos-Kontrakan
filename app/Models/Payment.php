@@ -10,12 +10,16 @@ class Payment extends Model
     use HasFactory;
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_PAID = 'paid';
+
     public const STATUS_FAILED = 'failed';
+
     public const STATUS_EXPIRED = 'expired';
 
     protected $fillable = [
         'booking_id',
+        'user_id',
         'invoice_number',
         'order_id',
         'tenant_name',
@@ -41,4 +45,14 @@ class Payment extends Model
         'gross_amount' => 'decimal:2',
         'amount' => 'decimal:2',
     ];
+
+    public function booking()
+    {
+        return $this->belongsTo(Booking::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

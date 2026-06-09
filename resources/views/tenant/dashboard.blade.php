@@ -1,535 +1,258 @@
-<!DOCTYPE html>
-<html lang="id">
+﻿@extends('tenant.layout')
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KostKu — Dashboard</title>
+@section('title', 'Dashboard - KostKu')
 
-  <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
-
-  @vite(['resources/css/style.css'])
-</head>
-
-<body>
-
-  <!-- ===================== SIDEBAR ===================== -->
-  <div class="wrapper d-flex">
-
-    <aside class="sidebar d-flex flex-column">
-      <!-- Brand -->
-      <div class="sidebar-brand">
-        <div class="brand-icon"><i class="bi bi-buildings-fill"></i></div>
-        <div>
-          <span class="brand-name">KostKu</span>
-          <span class="brand-sub">Property Manager</span>
-        </div>
-      </div>
-
-      <!-- Nav -->
-      <nav class="sidebar-nav flex-grow-1">
-        <p class="nav-label">Menu Utama</p>
-        <a href="#" class="nav-item active">
-          <i class="bi bi-grid-1x2-fill"></i> Dashboard
+@section('content')
+<div class="content-header">
+    <div class="header-title">
+        <h1>Ringkasan Penyewa</h1>
+        <p>Pantau booking, pembayaran, dan rekomendasi hunian Anda.</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ route('tenant.search') }}" class="btn btn-primary">
+            <i class="bi bi-search"></i> Cari Kos
         </a>
-        <a href="#" class="nav-item">
-          <i class="bi bi-house-door-fill"></i> Properti
-          <span class="badge-nav">12</span>
-        </a>
-        <a href="#" class="nav-item">
-          <i class="bi bi-people-fill"></i> Penyewa
-          <span class="badge-nav">47</span>
-        </a>
-        <a href="#" class="nav-item">
-          <i class="bi bi-cash-coin"></i> Pembayaran
-        </a>
-        <a href="#" class="nav-item">
-          <i class="bi bi-file-earmark-text-fill"></i> Kontrak
-        </a>
+    </div>
+</div>
 
-        <p class="nav-label mt-3">Operasional</p>
-        <a href="#" class="nav-item">
-          <i class="bi bi-wrench-adjustable-circle-fill"></i> Pemeliharaan
-          <span class="badge-nav danger">3</span>
-        </a>
-        <a href="#" class="nav-item">
-          <i class="bi bi-megaphone-fill"></i> Pengumuman
-        </a>
-        <a href="#" class="nav-item">
-          <i class="bi bi-bar-chart-fill"></i> Laporan
-        </a>
-
-        <p class="nav-label mt-3">Akun</p>
-        <a href="{{ route('profile.edit') }}" class="nav-item">
-          <i class="bi bi-gear-fill"></i> Pengaturan
-        </a>
-      </nav>
-
-      <!-- User -->
-      <div class="sidebar-user">
-        <img src="https://i.pravatar.cc/40?img=12" alt="avatar" class="user-avatar" />
-        <div class="user-info">
-          <span class="user-name">Budi Santoso</span>
-          <span class="user-role">Pemilik</span>
-        </div>
-        <form method="POST" action="{{ route('logout') }}">
-          @csrf
-
-          <x-responsive-nav-link :href="route('logout')"
-            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-            {{ __('Log Out') }}
-          </x-responsive-nav-link>
-        </form>
-      </div>
-    </aside>
-
-    <!-- ===================== MAIN CONTENT ===================== -->
-    <main class="main-content flex-grow-1">
-
-      <!-- Topbar -->
-      <header class="topbar d-flex align-items-center justify-content-between">
-        <div>
-          <h4 class="topbar-title">Selamat Datang, Budi 👋</h4>
-          <p class="topbar-sub">Kamis, 29 Mei 2025 · Ringkasan properti Anda hari ini</p>
-        </div>
-        <div class="topbar-actions d-flex align-items-center gap-3">
-          <div class="search-box">
-            <i class="bi bi-search"></i>
-            <input type="text" placeholder="Cari properti, penyewa…" />
-          </div>
-          <button class="btn-icon" title="Notifikasi">
-            <i class="bi bi-bell-fill"></i>
-            <span class="notif-dot"></span>
-          </button>
-          <img src="https://i.pravatar.cc/36?img=12" class="topbar-avatar" alt="avatar" />
-        </div>
-      </header>
-
-      <!-- ===================== STAT CARDS ===================== -->
-      <div class="content-body">
-        <div class="row g-4 mb-4">
-          <div class="col-xl-3 col-sm-6">
-            <div class="stat-card card-teal">
-              <div class="stat-icon"><i class="bi bi-house-fill"></i></div>
-              <div class="stat-info">
-                <span class="stat-label">Total Properti</span>
-                <span class="stat-value">12</span>
-                <span class="stat-delta up"><i class="bi bi-arrow-up-short"></i> 2 bulan ini</span>
-              </div>
+<!-- Statistik -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card card-teal">
+            <div class="stat-icon">
+                <i class="bi bi-calendar-check-fill"></i>
             </div>
-          </div>
-          <div class="col-xl-3 col-sm-6">
-            <div class="stat-card card-amber">
-              <div class="stat-icon"><i class="bi bi-door-open-fill"></i></div>
-              <div class="stat-info">
-                <span class="stat-label">Kamar Tersewa</span>
-                <span class="stat-value">38<small>/47</small></span>
-                <span class="stat-delta up"><i class="bi bi-arrow-up-short"></i> 81% terisi</span>
-              </div>
+            <div class="stat-info">
+                <span class="stat-label">Booking Aktif</span>
+                <span class="stat-value">{{ $stats['active_bookings'] }}</span>
+                <span class="stat-delta up"><i class="bi bi-check-circle"></i> Sedang berjalan</span>
             </div>
-          </div>
-          <div class="col-xl-3 col-sm-6">
-            <div class="stat-card card-green">
-              <div class="stat-icon"><i class="bi bi-currency-dollar"></i></div>
-              <div class="stat-info">
-                <span class="stat-label">Pemasukan Bulan Ini</span>
-                <span class="stat-value">Rp 48,5<small>jt</small></span>
-                <span class="stat-delta up"><i class="bi bi-arrow-up-short"></i> +12% vs bulan lalu</span>
-              </div>
-            </div>
-          </div>
-          <div class="col-xl-3 col-sm-6">
-            <div class="stat-card card-rose">
-              <div class="stat-icon"><i class="bi bi-exclamation-circle-fill"></i></div>
-              <div class="stat-info">
-                <span class="stat-label">Tunggakan</span>
-                <span class="stat-value">5</span>
-                <span class="stat-delta down"><i class="bi bi-arrow-down-short"></i> 3 jatuh tempo</span>
-              </div>
-            </div>
-          </div>
         </div>
+    </div>
 
-        <!-- ===================== MID ROW ===================== -->
-        <div class="row g-4 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card card-amber">
+            <div class="stat-icon">
+                <i class="bi bi-clock-fill"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Menunggu Bayar</span>
+                <span class="stat-value">{{ $stats['pending_payments'] }}</span>
+                <span class="stat-delta down"><i class="bi bi-exclamation-circle"></i> Perlu tindakan</span>
+            </div>
+        </div>
+    </div>
 
-          <!-- Properti Overview -->
-          <div class="col-xl-8">
-            <div class="panel">
-              <div class="panel-header">
-                <div>
-                  <h6 class="panel-title">Daftar Properti</h6>
-                  <p class="panel-sub">Semua unit yang Anda kelola</p>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card card-green">
+            <div class="stat-icon">
+                <i class="bi bi-receipt"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Total Transaksi</span>
+                <span class="stat-value">{{ $stats['total_transactions'] }}</span>
+                <span class="stat-delta up"><i class="bi bi-shield-check"></i> Tercatat aman</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card card-rose">
+            <div class="stat-icon">
+                <i class="bi bi-heart-fill"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Wishlist</span>
+                <span class="stat-value">{{ $stats['wishlist_count'] }}</span>
+                <span class="stat-delta down"><i class="bi bi-heart"></i> Kos tersimpan</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Aktif -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h5 style="margin: 0; font-weight: 700;">Booking Aktif</h5>
+                <a href="{{ route('tenant.bookings') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+            </div>
+
+            @if($activeBookings->count() > 0)
+                <div class="row g-3">
+                    @foreach($activeBookings as $booking)
+                        <div class="col-md-4">
+                            <div style="border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; transition: all 0.3s;">
+                                <img src="{{ $booking->room?->property?->image_url ?? 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267' }}" alt="{{ $booking->kos_name }}" style="width: 100%; height: 150px; object-fit: cover;">
+                                <div style="padding: 1rem;">
+                                    <h6 style="margin: 0 0 0.5rem; font-weight: 600;">{{ $booking->kos_name }}</h6>
+                                    <p style="margin: 0.25rem 0; font-size: 0.9rem; color: #64748b;">
+                                        <i class="bi bi-geo-fill"></i> {{ $booking->location }}
+                                    </p>
+                                    <p style="margin: 0.25rem 0; font-size: 0.9rem; color: #64748b;">
+                                        <i class="bi bi-door-closed"></i> Kamar {{ $booking->room_type }}
+                                    </p>
+                                    <p style="margin: 0.5rem 0 0; font-size: 0.85rem;">
+                                        Durasi: <strong>{{ $booking->duration_months }} bulan</strong>
+                                    </p>
+                                    <div style="margin-top: 1rem;">
+                                        <span class="badge" style="background-color: var(--success); color: white;">Aktif</span>
+                                        <a href="{{ route('tenant.booking-detail', $booking) }}" class="btn btn-sm btn-outline-primary float-end">Detail</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
-                <button class="btn-add"><i class="bi bi-plus-lg"></i> Tambah Properti</button>
-              </div>
+            @else
+                <div style="text-align: center; padding: 2rem; color: #64748b;">
+                    <i class="bi bi-inbox" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>Belum ada booking aktif. <a href="{{ route('tenant.search') }}">Mulai cari kos sekarang!</a></p>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
 
-              <div class="property-list">
+<!-- Pembayaran Terbaru -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h5 style="margin: 0; font-weight: 700;">Pembayaran Terbaru</h5>
+                <a href="{{ route('tenant.payments') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+            </div>
 
-                <!-- Item -->
-                <div class="property-item">
-                  <div class="prop-thumb" style="background:#e0f2f1;">
-                    <i class="bi bi-building" style="color:#0d9488;"></i>
-                  </div>
-                  <div class="prop-info">
-                    <span class="prop-name">Kost Putri Melati</span>
-                    <span class="prop-addr"><i class="bi bi-geo-alt-fill"></i> Jl. Kebon Jeruk No. 12, Jakarta Barat</span>
-                  </div>
-                  <div class="prop-stat">
-                    <div class="occ-bar">
-                      <div class="occ-fill" style="width:80%;background:#0d9488;"></div>
+            @if($recentPayments->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-hover" style="margin: 0;">
+                        <thead style="background-color: var(--light);">
+                            <tr>
+                                <th>Invoice</th>
+                                <th>Nama Kos</th>
+                                <th>Total</th>
+                                <th>Metode</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($recentPayments as $payment)
+                                <tr>
+                                    <td><strong>{{ $payment->invoice_number ?? 'N/A' }}</strong></td>
+                                    <td>{{ $payment->booking->kos_name ?? $payment->tenant_name }}</td>
+                                    <td>Rp {{ number_format($payment->gross_amount ?? $payment->amount, 0, ',', '.') }}</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">{{ $payment->payment_method ?? 'Belum dipilih' }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ $payment->payment_status === 'paid' ? 'success' : ($payment->payment_status === 'pending' ? 'warning' : 'danger') }}">
+                                            {{ ucfirst($payment->payment_status) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('tenant.payment-detail', $payment) }}" class="btn btn-sm btn-primary">Detail</a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <p style="text-align: center; color: #64748b; margin: 0;">Tidak ada pembayaran terbaru</p>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- Rekomendasi Kos -->
+<div class="row g-3">
+    <div class="col-12">
+        <div style="margin-bottom: 1.5rem;">
+            <h5 style="margin: 0; font-weight: 700;">Rekomendasi Kos Untuk Anda</h5>
+            <p style="margin: 0.5rem 0 0; color: #64748b; font-size: 0.9rem;">Temukan kos terbaik yang sesuai dengan kebutuhan Anda</p>
+        </div>
+
+        <div class="row g-3">
+            @forelse($recommendations as $property)
+                <div class="col-md-6 col-lg-4">
+                    <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white; transition: all 0.3s; cursor: pointer;">
+                        <div style="position: relative; height: 200px; overflow: hidden;">
+                            <img src="{{ $property->image_url }}" alt="{{ $property->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <form action="{{ route('tenant.wishlist.add', $property) }}" method="POST" style="position: absolute; top: 10px; right: 10px;">
+                                @csrf
+                                <button class="btn btn-sm btn-light"><i class="bi bi-heart"></i></button>
+                            </form>
+                        </div>
+                        <div style="padding: 1rem;">
+                            <h6 style="margin: 0 0 0.5rem; font-weight: 600;">{{ $property->name }}</h6>
+                            <p style="margin: 0.25rem 0; font-size: 0.9rem; color: #64748b;">
+                                <i class="bi bi-geo-fill"></i> {{ $property->location }}
+                            </p>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0; font-size: 0.9rem;">
+                                <i class="bi bi-star-fill" style="color: #F59E0B;"></i>
+                                <strong>{{ $property->rating ?? 'N/A' }}</strong>
+                                <span style="color: #64748b;">({{ $property->review_count }} review)</span>
+                            </div>
+                            @if($property->rooms()->first())
+                                <p style="margin: 0.5rem 0; font-weight: 600; color: var(--primary); font-size: 1rem;">
+                                    Mulai dari Rp {{ number_format($property->rooms()->min('price_per_month'), 0, ',', '.') }}/bln
+                                </p>
+                            @endif
+                            <p style="margin: 0.5rem 0 1rem; font-size: 0.85rem; color: #64748b;">
+                                @php
+                                    $facilities = is_array($property->facilities) ? $property->facilities : [];
+                                    $facilityText = implode(', ', array_slice($facilities, 0, 2));
+                                @endphp
+                                {{ $facilityText ? $facilityText . '...' : 'Lihat fasilitas lengkap' }}
+                            </p>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="{{ route('tenant.property-detail', $property) }}" class="btn btn-sm btn-outline-primary flex-grow-1">Detail</a>
+                                <form action="{{ route('tenant.wishlist.add', $property) }}" method="POST" class="flex-grow-1">
+                                    @csrf
+                                    <button class="btn btn-sm btn-light w-100"><i class="bi bi-heart"></i> Simpan</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                    <span class="occ-text">8/10 terisi</span>
-                  </div>
-                  <span class="prop-badge badge-kost">Kost</span>
-                  <div class="prop-actions">
-                    <button class="btn-ghost"><i class="bi bi-pencil"></i></button>
-                    <button class="btn-ghost"><i class="bi bi-eye"></i></button>
-                  </div>
                 </div>
-
-                <div class="property-item">
-                  <div class="prop-thumb" style="background:#fef3c7;">
-                    <i class="bi bi-houses" style="color:#d97706;"></i>
-                  </div>
-                  <div class="prop-info">
-                    <span class="prop-name">Kontrakan Griya Asri</span>
-                    <span class="prop-addr"><i class="bi bi-geo-alt-fill"></i> Jl. Cempaka Putih Tengah IV, Jakarta Pusat</span>
-                  </div>
-                  <div class="prop-stat">
-                    <div class="occ-bar">
-                      <div class="occ-fill" style="width:60%;background:#d97706;"></div>
-                    </div>
-                    <span class="occ-text">3/5 terisi</span>
-                  </div>
-                  <span class="prop-badge badge-kontrakan">Kontrakan</span>
-                  <div class="prop-actions">
-                    <button class="btn-ghost"><i class="bi bi-pencil"></i></button>
-                    <button class="btn-ghost"><i class="bi bi-eye"></i></button>
-                  </div>
+            @empty
+                <div class="col-12" style="text-align: center; padding: 2rem; color: #64748b;">
+                    <p>Tidak ada rekomendasi tersedia saat ini</p>
                 </div>
-
-                <div class="property-item">
-                  <div class="prop-thumb" style="background:#ede9fe;">
-                    <i class="bi bi-building-fill" style="color:#7c3aed;"></i>
-                  </div>
-                  <div class="prop-info">
-                    <span class="prop-name">Kost Putra Bahagia</span>
-                    <span class="prop-addr"><i class="bi bi-geo-alt-fill"></i> Jl. Margonda Raya No. 88, Depok</span>
-                  </div>
-                  <div class="prop-stat">
-                    <div class="occ-bar">
-                      <div class="occ-fill" style="width:93%;background:#7c3aed;"></div>
-                    </div>
-                    <span class="occ-text">14/15 terisi</span>
-                  </div>
-                  <span class="prop-badge badge-kost">Kost</span>
-                  <div class="prop-actions">
-                    <button class="btn-ghost"><i class="bi bi-pencil"></i></button>
-                    <button class="btn-ghost"><i class="bi bi-eye"></i></button>
-                  </div>
-                </div>
-
-                <div class="property-item">
-                  <div class="prop-thumb" style="background:#fce7f3;">
-                    <i class="bi bi-house-heart-fill" style="color:#db2777;"></i>
-                  </div>
-                  <div class="prop-info">
-                    <span class="prop-name">Kontrakan Villa Anggrek</span>
-                    <span class="prop-addr"><i class="bi bi-geo-alt-fill"></i> Jl. Pondok Labu No. 5, Jakarta Selatan</span>
-                  </div>
-                  <div class="prop-stat">
-                    <div class="occ-bar">
-                      <div class="occ-fill" style="width:50%;background:#db2777;"></div>
-                    </div>
-                    <span class="occ-text">3/6 terisi</span>
-                  </div>
-                  <span class="prop-badge badge-kontrakan">Kontrakan</span>
-                  <div class="prop-actions">
-                    <button class="btn-ghost"><i class="bi bi-pencil"></i></button>
-                    <button class="btn-ghost"><i class="bi bi-eye"></i></button>
-                  </div>
-                </div>
-
-              </div>
-
-              <a href="#" class="see-all">Lihat semua properti <i class="bi bi-arrow-right"></i></a>
-            </div>
-          </div>
-
-          <!-- Sidebar Right -->
-          <div class="col-xl-4 d-flex flex-column gap-4">
-
-            <!-- Kalender Jatuh Tempo -->
-            <div class="panel flex-grow-1">
-              <div class="panel-header">
-                <div>
-                  <h6 class="panel-title">Jatuh Tempo</h6>
-                  <p class="panel-sub">Tagihan bulan ini</p>
-                </div>
-                <span class="chip chip-warning">3 Mendesak</span>
-              </div>
-              <div class="due-list">
-                <div class="due-item">
-                  <div class="due-dot dot-red"></div>
-                  <div class="due-info">
-                    <span class="due-name">Ahmad Fauzi</span>
-                    <span class="due-unit">Kost Melati · Kamar 3A</span>
-                  </div>
-                  <div class="due-right">
-                    <span class="due-amount">Rp 1.200.000</span>
-                    <span class="due-date overdue">Terlambat 3 hari</span>
-                  </div>
-                </div>
-                <div class="due-item">
-                  <div class="due-dot dot-orange"></div>
-                  <div class="due-info">
-                    <span class="due-name">Siti Rahayu</span>
-                    <span class="due-unit">Kontrakan Griya · Unit B</span>
-                  </div>
-                  <div class="due-right">
-                    <span class="due-amount">Rp 2.500.000</span>
-                    <span class="due-date warning-date">Jatuh tempo besok</span>
-                  </div>
-                </div>
-                <div class="due-item">
-                  <div class="due-dot dot-orange"></div>
-                  <div class="due-info">
-                    <span class="due-name">Rizky Pratama</span>
-                    <span class="due-unit">Kost Bahagia · Kamar 7</span>
-                  </div>
-                  <div class="due-right">
-                    <span class="due-amount">Rp 900.000</span>
-                    <span class="due-date warning-date">Jatuh tempo besok</span>
-                  </div>
-                </div>
-                <div class="due-item">
-                  <div class="due-dot dot-green"></div>
-                  <div class="due-info">
-                    <span class="due-name">Dewi Anggraeni</span>
-                    <span class="due-unit">Kost Melati · Kamar 5B</span>
-                  </div>
-                  <div class="due-right">
-                    <span class="due-amount">Rp 1.200.000</span>
-                    <span class="due-date ok-date">3 Juni 2025</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Permintaan Pemeliharaan -->
-            <div class="panel">
-              <div class="panel-header">
-                <div>
-                  <h6 class="panel-title">Pemeliharaan</h6>
-                  <p class="panel-sub">Permintaan aktif</p>
-                </div>
-                <span class="chip chip-danger">3 Baru</span>
-              </div>
-              <div class="maintain-list">
-                <div class="maintain-item">
-                  <div class="maint-icon" style="background:#fef3c7;color:#d97706;"><i class="bi bi-lightning-charge-fill"></i></div>
-                  <div class="maint-info">
-                    <span class="maint-title">Listrik mati — Kamar 2A</span>
-                    <span class="maint-loc">Kost Melati</span>
-                  </div>
-                  <span class="maint-status status-open">Baru</span>
-                </div>
-                <div class="maintain-item">
-                  <div class="maint-icon" style="background:#e0f2f1;color:#0d9488;"><i class="bi bi-droplet-fill"></i></div>
-                  <div class="maint-info">
-                    <span class="maint-title">Pipa bocor — Kamar Mandi</span>
-                    <span class="maint-loc">Kontrakan Griya · Unit C</span>
-                  </div>
-                  <span class="maint-status status-progress">Proses</span>
-                </div>
-                <div class="maintain-item">
-                  <div class="maint-icon" style="background:#ede9fe;color:#7c3aed;"><i class="bi bi-door-closed-fill"></i></div>
-                  <div class="maint-info">
-                    <span class="maint-title">Pintu rusak — Kamar 7</span>
-                    <span class="maint-loc">Kost Bahagia</span>
-                  </div>
-                  <span class="maint-status status-open">Baru</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
+            @endforelse
         </div>
+    </div>
+</div>
 
-        <!-- ===================== BOTTOM ROW ===================== -->
-        <div class="row g-4">
-
-          <!-- Penyewa Terbaru -->
-          <div class="col-xl-7">
-            <div class="panel">
-              <div class="panel-header">
-                <div>
-                  <h6 class="panel-title">Penyewa Terbaru</h6>
-                  <p class="panel-sub">5 penyewa yang baru bergabung</p>
-                </div>
-                <a href="#" class="see-all-link">Lihat semua</a>
-              </div>
-              <div class="table-responsive">
-                <table class="table tenant-table">
-                  <thead>
-                    <tr>
-                      <th>Penyewa</th>
-                      <th>Unit</th>
-                      <th>Sewa/Bulan</th>
-                      <th>Kontrak</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <div class="d-flex align-items-center gap-2">
-                          <img src="https://i.pravatar.cc/32?img=5" class="tenant-pic" alt="" />
-                          <div>
-                            <span class="t-name">Rina Kusuma</span>
-                            <span class="t-phone">+62 812-xxxx-1234</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span class="unit-tag">Melati · 4A</span></td>
-                      <td class="fw-600">Rp 1.200.000</td>
-                      <td class="text-muted small">01 Mei — 30 Apr '26</td>
-                      <td><span class="status-pill pill-active">Aktif</span></td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex align-items-center gap-2">
-                          <img src="https://i.pravatar.cc/32?img=8" class="tenant-pic" alt="" />
-                          <div>
-                            <span class="t-name">Dimas Aditya</span>
-                            <span class="t-phone">+62 858-xxxx-5678</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span class="unit-tag">Bahagia · 11</span></td>
-                      <td class="fw-600">Rp 900.000</td>
-                      <td class="text-muted small">15 Apr — 14 Apr '26</td>
-                      <td><span class="status-pill pill-active">Aktif</span></td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex align-items-center gap-2">
-                          <img src="https://i.pravatar.cc/32?img=15" class="tenant-pic" alt="" />
-                          <div>
-                            <span class="t-name">Mira Handayani</span>
-                            <span class="t-phone">+62 821-xxxx-9012</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span class="unit-tag">Griya · Unit A</span></td>
-                      <td class="fw-600">Rp 2.500.000</td>
-                      <td class="text-muted small">01 Apr — 31 Mar '26</td>
-                      <td><span class="status-pill pill-warning">Perlu Bayar</span></td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex align-items-center gap-2">
-                          <img src="https://i.pravatar.cc/32?img=22" class="tenant-pic" alt="" />
-                          <div>
-                            <span class="t-name">Hendra Wijaya</span>
-                            <span class="t-phone">+62 877-xxxx-3456</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span class="unit-tag">Anggrek · Unit 2</span></td>
-                      <td class="fw-600">Rp 2.000.000</td>
-                      <td class="text-muted small">20 Mar — 19 Mar '26</td>
-                      <td><span class="status-pill pill-active">Aktif</span></td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div class="d-flex align-items-center gap-2">
-                          <img src="https://i.pravatar.cc/32?img=30" class="tenant-pic" alt="" />
-                          <div>
-                            <span class="t-name">Yanti Saputri</span>
-                            <span class="t-phone">+62 813-xxxx-7890</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span class="unit-tag">Melati · 2B</span></td>
-                      <td class="fw-600">Rp 1.200.000</td>
-                      <td class="text-muted small">10 Mar — 09 Mar '26</td>
-                      <td><span class="status-pill pill-danger">Terlambat</span></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+<!-- Notifikasi Terbaru -->
+@if($notifications->count() > 0)
+<div class="row g-3 mt-4">
+    <div class="col-12">
+        <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h5 style="margin: 0; font-weight: 700;">Notifikasi Terbaru</h5>
+                <a href="{{ route('tenant.notifications') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
             </div>
-          </div>
 
-          <!-- Pemasukan Chart (simple bars) -->
-          <div class="col-xl-5">
-            <div class="panel h-100">
-              <div class="panel-header">
-                <div>
-                  <h6 class="panel-title">Pemasukan Bulanan</h6>
-                  <p class="panel-sub">Jan — Jun 2025</p>
-                </div>
-                <span class="chip chip-success">+12% <i class="bi bi-arrow-up-short"></i></span>
-              </div>
-              <div class="chart-wrap">
-                <div class="bar-chart">
-                  <div class="bar-col">
-                    <div class="bar-fill" style="height:55%;" title="Rp 28jt"><span class="bar-tip">28jt</span></div>
-                    <span class="bar-label">Jan</span>
-                  </div>
-                  <div class="bar-col">
-                    <div class="bar-fill" style="height:65%;" title="Rp 32jt"><span class="bar-tip">32jt</span></div>
-                    <span class="bar-label">Feb</span>
-                  </div>
-                  <div class="bar-col">
-                    <div class="bar-fill" style="height:72%;" title="Rp 38jt"><span class="bar-tip">38jt</span></div>
-                    <span class="bar-label">Mar</span>
-                  </div>
-                  <div class="bar-col">
-                    <div class="bar-fill" style="height:68%;" title="Rp 35jt"><span class="bar-tip">35jt</span></div>
-                    <span class="bar-label">Apr</span>
-                  </div>
-                  <div class="bar-col">
-                    <div class="bar-fill" style="height:83%;" title="Rp 43jt"><span class="bar-tip">43jt</span></div>
-                    <span class="bar-label">Mei</span>
-                  </div>
-                  <div class="bar-col active">
-                    <div class="bar-fill bar-active" style="height:93%;" title="Rp 48,5jt"><span class="bar-tip">48,5jt</span></div>
-                    <span class="bar-label bar-label-active">Jun</span>
-                  </div>
-                </div>
-                <div class="chart-summary">
-                  <div class="cs-item">
-                    <span class="cs-dot" style="background:#0d9488;"></span>
-                    <span>Kost</span>
-                    <strong>Rp 31,2jt</strong>
-                  </div>
-                  <div class="cs-item">
-                    <span class="cs-dot" style="background:#f59e0b;"></span>
-                    <span>Kontrakan</span>
-                    <strong>Rp 17,3jt</strong>
-                  </div>
-                </div>
-              </div>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                @foreach($notifications as $notification)
+                    <div style="padding: 1rem; background-color: var(--light); border-radius: 8px; display: flex; gap: 1rem;">
+                        <div style="width: 40px; height: 40px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0;">
+                            <i class="bi bi-bell-fill"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <h6 style="margin: 0; font-weight: 600;">{{ $notification->title }}</h6>
+                            <p style="margin: 0.25rem 0 0; font-size: 0.9rem; color: #64748b;">{{ $notification->message }}</p>
+                            <small style="color: #94a3b8;">{{ $notification->created_at->diffForHumans() }}</small>
+                        </div>
+                    </div>
+                @endforeach
             </div>
-          </div>
-
         </div>
-        <!-- end bottom row -->
+    </div>
+</div>
+@endif
 
-      </div><!-- end content-body -->
-    </main>
-  </div><!-- end wrapper -->
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
-</html>
+@endsection
