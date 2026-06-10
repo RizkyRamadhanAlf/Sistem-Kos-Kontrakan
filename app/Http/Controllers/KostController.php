@@ -7,9 +7,15 @@ use Illuminate\Http\Request;
 
 class KostController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $kosts = Kost::all();
+        $query = Kost::query();
+
+        if ($request->filled('search')) {
+            $query->where('nama_kost', 'like', '%' . $request->search . '%');
+        }
+
+        $kosts = $query->get();
 
         return view('kost.index', compact('kosts'));
     }

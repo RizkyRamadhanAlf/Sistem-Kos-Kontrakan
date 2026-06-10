@@ -13,6 +13,23 @@
 
     <h1>Daftar Kost</h1>
 
+    <form method="GET" action="{{ route('kost.index') }}">
+
+        <input
+            type="text"
+            name="search"
+            placeholder="Cari nama kost..."
+            value="{{ request('search') }}"
+        >
+
+        <button type="submit">
+            Cari
+        </button>
+
+    </form>
+
+    <br>
+
     @forelse($kosts as $kost)
         <div>
             <h3>{{ $kost->nama_kost }}</h3>
