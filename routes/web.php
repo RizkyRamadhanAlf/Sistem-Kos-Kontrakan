@@ -4,6 +4,7 @@ use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\KostController;
+use App\Http\Controllers\KamarController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -76,6 +77,8 @@ Route::delete('/kost/{kost}', [KostController::class, 'destroy'])
 
 Route::get('/kost/{kost}', [KostController::class, 'show'])
     ->name('kost.show');
+
+Route::resource('kamar', \App\Http\Controllers\KamarController::class);
 
 require __DIR__.'/auth.php';
 
