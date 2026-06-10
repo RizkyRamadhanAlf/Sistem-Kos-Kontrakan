@@ -19,7 +19,7 @@ return new class extends Migration
                 $table->string('order_id')->nullable()->after('invoice_number');
             }
             if (!Schema::hasColumn('payments', 'gross_amount')) {
-                $table->unsignedBigInteger('gross_amount')->nullable()->after('order_id');
+                $table->decimal('gross_amount', 15, 2)->nullable()->after('order_id');
             }
             if (!Schema::hasColumn('payments', 'payment_method')) {
                 $table->string('payment_method')->nullable()->after('gross_amount');

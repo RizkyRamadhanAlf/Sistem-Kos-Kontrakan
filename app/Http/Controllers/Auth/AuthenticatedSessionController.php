@@ -34,6 +34,17 @@ class AuthenticatedSessionController extends Controller
             'penyewa' => 'tenant.dashboard',
             default => abort(403, 'Role pengguna tidak dikenali.'),
         };
+        $user = $request->user();
+        
+        if ($user->hasRole('admin')) {
+            $dashboardRoute = 'dashboard.admin';
+        } elseif ($user->hasRole('owner') || $user->hasRole('tenant')) {
+            $dashboardRoute = 'dashboard.owner';
+        } elseif ($user->hasRole('penyewa')) {
+            $dashboardRoute = 'dashboard.tenant';
+        } else {
+            abort(403, 'Role pengguna tidak dikenali.');
+        }
 
         return redirect()->route($dashboardRoute);
     }

@@ -40,3 +40,4 @@ class RolesSeed extends Seeder
         $admin->assignRole('admin');
     }
 }
+

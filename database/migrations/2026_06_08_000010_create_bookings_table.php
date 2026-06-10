@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('duration_months')->default(1);
             $table->unsignedBigInteger('price_per_month')->default(0);
             $table->unsignedBigInteger('admin_fee')->default(0);
-            $table->unsignedBigInteger('total_amount')->default(0);
+            $table->decimal('total_amount', 15, 2)->default(0);
             $table->string('status')->default('pending');
             $table->timestamps();
         });
