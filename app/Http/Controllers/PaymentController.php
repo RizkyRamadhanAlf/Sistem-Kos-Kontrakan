@@ -47,7 +47,7 @@ class PaymentController extends Controller
             'amount' => $validated['amount'],
             'payment_date' => $validated['payment_date'],
             'receipt_path' => 'uploads/receipts/'.$receiptName,
-            'status' => Payment::STATUS_PENDING,
+            'payment_status' => Payment::STATUS_PENDING,
         ]);
 
         return redirect()->route('pembayaran.upload')->with('success', 'Bukti pembayaran berhasil diunggah. Silakan tunggu verifikasi.');
@@ -105,7 +105,6 @@ class PaymentController extends Controller
                 'amount' => $booking->total_amount,
                 'payment_date' => now(),
                 'payment_status' => Payment::STATUS_PENDING,
-                'status' => Payment::STATUS_PENDING,
                 'expired_at' => now()->addDay(),
             ]
         );
@@ -117,7 +116,7 @@ class PaymentController extends Controller
         if ($payment->payment_status === Payment::STATUS_PENDING && $payment->expired_at?->isPast()) {
             $payment->update([
                 'payment_status' => Payment::STATUS_EXPIRED,
-                'status' => Payment::STATUS_EXPIRED,
+                'expired_at' => now(),
             ]);
             $booking->update(['status' => Booking::STATUS_EXPIRED]);
         }

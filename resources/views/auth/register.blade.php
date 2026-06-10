@@ -12,7 +12,7 @@
                     const val = role && role.value ? role.value.trim().toLowerCase() : '';
                     if (!allowed.includes(val)) {
                         e.preventDefault();
-                        alert('Tipe pengguna harus salah satu: penyewa atau pemilik kos.');
+                        alert('Tipe pengguna harus salah satu: tenant atau owner.');
                         if (role) role.focus();
                     }
                 });
@@ -30,8 +30,8 @@
         <div class="mt-4">
             <x-input-label for="role" :value="__('Tipe Pengguna')" />
             <select id="role" name="role" class="block mt-1 w-full rounded-md border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
-                <option value="penyewa" {{ old('role')=='penyewa' ? 'selected' : '' }}>Penyewa</option>
-                <option value="tenant" {{ old('role')=='tenant' ? 'selected' : '' }}>Pemilik Kos</option>
+                <option value="tenant" {{ old('role')=='tenant' ? 'selected' : '' }}>Tenant</option>
+                <option value="owner" {{ old('role')=='owner' ? 'selected' : '' }}>Owner</option>
             </select>
             <x-input-error :messages="$errors->get('role')" class="mt-2" />
         </div>
