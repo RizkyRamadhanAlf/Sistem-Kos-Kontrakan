@@ -12,7 +12,7 @@
                     const val = role && role.value ? role.value.trim().toLowerCase() : '';
                     if (!allowed.includes(val)) {
                         e.preventDefault();
-                        alert('Role harus salah satu: owner atau tenant.');
+                        alert('Tipe pengguna harus salah satu: penyewa atau pemilik kos.');
                         if (role) role.focus();
                     }
                 });
@@ -26,12 +26,12 @@
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
-        <!--role-->
+        <!-- Tipe Pengguna -->
         <div class="mt-4">
-            <x-input-label for="role" :value="__('Role')" />
+            <x-input-label for="role" :value="__('Tipe Pengguna')" />
             <select id="role" name="role" class="block mt-1 w-full rounded-md border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
-                <option value="owner" {{ old('role')=='owner' ? 'selected' : '' }}>Owner</option>
-                <option value="tenant" {{ old('role')=='tenant' ? 'selected' : '' }}>Tenant</option>
+                <option value="penyewa" {{ old('role')=='penyewa' ? 'selected' : '' }}>Penyewa</option>
+                <option value="tenant" {{ old('role')=='tenant' ? 'selected' : '' }}>Pemilik Kos</option>
             </select>
             <x-input-error :messages="$errors->get('role')" class="mt-2" />
         </div>
@@ -86,7 +86,7 @@
             </a>
 
             <x-primary-button class="ms-4">
-                {{ __('Register') }}
+                {{ __('Daftar') }}
             </x-primary-button>
         </div>
     </form>

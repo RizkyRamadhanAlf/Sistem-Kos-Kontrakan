@@ -86,6 +86,22 @@
             flex-wrap: wrap;
         }
 
+        .flash-message {
+            position: fixed;
+            top: 82px;
+            left: 50%;
+            z-index: 1000;
+            transform: translateX(-50%);
+            padding: 12px 18px;
+            border: 1px solid #bbf7d0;
+            border-radius: 10px;
+            background: #f0fdf4;
+            color: #15803d;
+            box-shadow: 0 8px 28px rgba(15, 25, 35, .12);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
         .hero {
             display: grid;
             grid-template-columns: 1.1fr 0.9fr;
@@ -519,6 +535,10 @@
 </head>
 <body>
     <div class="landing">
+        @if(session('status'))
+            <div class="flash-message">{{ session('status') }}</div>
+        @endif
+
         <header class="navbar">
             <a href="/" class="brand">
                 <div class="brand-icon"><i class="bi bi-buildings-fill"></i></div>
@@ -532,8 +552,16 @@
                 <a href="#bantuan">Bantuan</a>
             </nav>
             <div class="btn-group-top">
-                <a href="/login" class="btn btn-outline-primary btn-sm">Login</a>
-                <a href="/register" class="btn btn-primary btn-sm">Daftar</a>
+                @guest
+                    <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm">Login</a>
+                    <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Daftar</a>
+                @else
+                    <a href="{{ route('dashboard') }}" class="btn btn-primary btn-sm">Dashboard</a>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-primary btn-sm">Logout</button>
+                    </form>
+                @endguest
             </div>
         </header>
 

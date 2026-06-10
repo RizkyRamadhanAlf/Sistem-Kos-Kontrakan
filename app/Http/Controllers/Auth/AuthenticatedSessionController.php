@@ -28,12 +28,16 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $request->authenticate();
-        
-        $request->session()->regenerate();
-        
-        return redirect()->intended(route('dashboard', absolute: false));
-    } // Added missing closing brace for the store method
+        $dashboardRoute = match ($request->user()->role) {
+            'admin' => 'dashboard.admin',
+            'tenant' => 'dashboard.pemilik',
+            'penyewa' => 'tenant.dashboard',
+            default => abort(403, 'Role pengguna tidak dikenali.'),
+        };
+
+        return redirect()->route($dashboardRoute);
+    }
+
     /**
      * Destroy an authenticated session.
      */
@@ -45,6 +49,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()
+            ->route('landing')
+            ->with('status', 'Anda berhasil logout.');
     }
 }

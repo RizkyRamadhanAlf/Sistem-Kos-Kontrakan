@@ -26,6 +26,7 @@ class User extends Authenticatable
         'phone',
         'address',
         'role',
+        'profile_photo_path',
     ];
 
     /**
@@ -47,4 +48,35 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    // Relationships
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function properties()
+    {
+        return $this->hasMany(Property::class, 'owner_id');
+    }
 }
