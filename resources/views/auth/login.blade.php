@@ -40,8 +40,13 @@
             @endif
 
             <x-primary-button class="ms-3">
-                {{ __('Log in') }}
+                {{ __('Login') }}
             </x-primary-button>
         </div>
+
+        <p class="mt-4 text-center text-sm text-gray-600">
+            Belum memiliki akun?
+            <a href="{{ route('register') }}" class="font-semibold text-indigo-600 hover:text-indigo-500">Daftar sekarang</a>
+        </p>
     </form>
 </x-guest-layout>
