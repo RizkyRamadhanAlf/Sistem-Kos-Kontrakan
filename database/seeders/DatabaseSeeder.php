@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Models\Wishlist;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -21,6 +23,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // User::factory(10)->create();
+
+        $this->call([
+            RolesSeed::class,
+        ]);
         $this->call(AdminSeed::class);
 
         // Create Owner/Pemilik Users

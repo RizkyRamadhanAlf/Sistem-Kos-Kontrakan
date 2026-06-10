@@ -8,7 +8,7 @@
                 if (!form) return;
                 form.addEventListener('submit', function (e) {
                     const role = form.querySelector('#role');
-                    const allowed = ['penyewa', 'tenant'];
+                    const allowed = ['owner', 'tenant'];
                     const val = role && role.value ? role.value.trim().toLowerCase() : '';
                     if (!allowed.includes(val)) {
                         e.preventDefault();

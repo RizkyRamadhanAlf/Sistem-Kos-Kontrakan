@@ -75,7 +75,12 @@
         <span class="user-name">Budi Santoso</span>
         <span class="user-role">Pemilik</span>
       </div>
-      <i class="bi bi-box-arrow-right logout-icon"></i>
+      <form action="{{ route('logout') }}" method="POST" class="d-inline">
+        @csrf
+        <button type="submit" class="btn btn-link p-0">
+          <i class="bi bi-box-arrow-right logout-icon"></i>
+        </button>
+      </form>
     </div>
   </aside>
 
@@ -85,7 +90,7 @@
     <!-- Topbar -->
     <header class="topbar d-flex align-items-center justify-content-between">
       <div>
-        <h4 class="topbar-title">Selamat Datang, Budi 👋</h4>
+        <h4 class="topbar-title">Selamat Datang, {{ auth()->user()->name }} 👋</h4>
         <p class="topbar-sub">Kamis, 29 Mei 2025 · Ringkasan properti Anda hari ini</p>
       </div>
       <div class="topbar-actions d-flex align-items-center gap-3">
