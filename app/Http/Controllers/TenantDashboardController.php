@@ -8,11 +8,13 @@ use App\Models\Payment;
 use App\Models\Property;
 use App\Models\Review;
 use App\Models\Wishlist;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class TenantDashboardController extends Controller
@@ -216,11 +218,14 @@ class TenantDashboardController extends Controller
     {
         $this->authorize('view', $payment);
 
-        $payment->load('booking.room.property');
+        $payment->load('user', 'booking.room.property');
 
-        return response()
-            ->view('tenant.invoice', compact('payment'))
-            ->header('Content-Disposition', 'attachment; filename="'.$payment->invoice_number.'.html"');
+        $invoiceNumber = $payment->invoice_number ?: 'INV-'.$payment->id;
+        $filename = Str::slug($invoiceNumber).'.pdf';
+
+        return Pdf::loadView('tenant.invoice', compact('payment', 'invoiceNumber'))
+            ->setPaper('a4')
+            ->download($filename);
     }
 
     /**
