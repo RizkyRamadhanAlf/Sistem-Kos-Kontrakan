@@ -54,7 +54,7 @@ class PaymentCheckoutTest extends TestCase
 
         $this->actingAs($tenant)
             ->post(route('booking.cancel', $booking))
-            ->assertRedirect(route('tenant.bookings'));
+            ->assertRedirect(route('tenant.booking-detail', $booking));
 
         $this->assertDatabaseHas('bookings', [
             'id' => $booking->id,

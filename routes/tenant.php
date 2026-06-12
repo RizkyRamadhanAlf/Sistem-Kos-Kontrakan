@@ -28,13 +28,10 @@ Route::get('/profil', [$controller, 'profile'])->name('tenant.profile');
 Route::patch('/profil/update', [$controller, 'updateProfile'])->name('tenant.profile.update');
 Route::post('/profil/password', [$controller, 'updatePassword'])->name('tenant.profile.update-password');
 
-
-
 Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
 Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
 Route::get('/booking/{booking}/pembayaran', [PaymentController::class, 'showBookingPayment'])->name('booking.payment.show');
 Route::post('/booking/{booking}/pembayaran/snap', [PaymentController::class, 'createSnapToken'])->name('booking.payment.snap');
-Route::post('/booking/{booking}/batalkan', [PaymentController::class, 'cancelBooking'])->name('booking.cancel');
 Route::post('/booking/{booking}/kedaluwarsa', [PaymentController::class, 'expireBooking'])->name('booking.expire');
 
 Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');

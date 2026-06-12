@@ -229,19 +229,6 @@ class PaymentController extends Controller
         return response()->json(['token' => $snapToken, 'payment' => $payment]);
     }
 
-    public function cancelBooking(Booking $booking)
-    {
-        $this->authorize('update', $booking);
-
-        $booking->update(['status' => Booking::STATUS_CANCELLED]);
-        $booking->payment?->update([
-            'payment_status' => Payment::STATUS_FAILED,
-            'status' => Payment::STATUS_FAILED,
-        ]);
-
-        return redirect()->route('tenant.bookings')->with('success', 'Booking berhasil dibatalkan.');
-    }
-
     public function expireBooking(Booking $booking)
     {
         $this->authorize('update', $booking);

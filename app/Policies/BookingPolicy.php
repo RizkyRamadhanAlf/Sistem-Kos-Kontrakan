@@ -14,7 +14,8 @@ class BookingPolicy
 
     public function update(User $user, Booking $booking): bool
     {
-        return $user->id === $booking->user_id && $booking->status === Booking::STATUS_PENDING;
+        return $user->id === $booking->user_id
+            && in_array($booking->status, [Booking::STATUS_PENDING, 'menunggu pembayaran'], true);
     }
 
     public function delete(User $user, Booking $booking): bool

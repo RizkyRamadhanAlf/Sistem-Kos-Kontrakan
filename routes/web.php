@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 });
+
+Route::middleware(['auth', 'role:tenant'])->post('/booking/{booking}/cancel', [BookingController::class, 'cancel'])
+    ->name('booking.cancel');
 
 Route::post('/midtrans/notification', [PaymentController::class, 'notificationHandler'])->name('midtrans.notification');
 Route::post('/payments/webhook', [PaymentController::class, 'notificationHandler'])->name('payments.webhook');
