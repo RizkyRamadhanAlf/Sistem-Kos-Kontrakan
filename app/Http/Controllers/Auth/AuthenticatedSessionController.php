@@ -28,20 +28,14 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $dashboardRoute = match ($request->user()->role) {
-            'admin' => 'dashboard.admin',
-            'tenant' => 'dashboard.pemilik',
-            'penyewa' => 'tenant.dashboard',
-            default => abort(403, 'Role pengguna tidak dikenali.'),
-        };
         $user = $request->user();
-        
+
         if ($user->hasRole('admin')) {
             $dashboardRoute = 'dashboard.admin';
-        } elseif ($user->hasRole('owner') || $user->hasRole('tenant')) {
+        } elseif ($user->hasRole('owner')) {
             $dashboardRoute = 'dashboard.owner';
-        } elseif ($user->hasRole('penyewa')) {
-            $dashboardRoute = 'dashboard.tenant';
+        } elseif ($user->hasRole('tenant')) {
+            $dashboardRoute = 'tenant.dashboard';
         } else {
             abort(403, 'Role pengguna tidak dikenali.');
         }

@@ -7,12 +7,14 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Schema;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -48,6 +50,31 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(function (User $user): void {
+            if (! Schema::hasTable('roles') || ! Schema::hasTable('model_has_roles')) {
+                return;
+            }
+
+            $role = match ($user->role) {
+                'admin', 'owner', 'tenant' => $user->role,
+                'penyewa', 'member' => 'tenant',
+                default => null,
+            };
+
+            if (! $role) {
+                return;
+            }
+
+            Role::findOrCreate($role);
+
+            if (! $user->hasExactRoles($role)) {
+                $user->syncRoles([$role]);
+            }
+        });
+    }
 
     // Relationships
     public function bookings()
