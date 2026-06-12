@@ -40,6 +40,10 @@ class Booking extends Model
 
     public const STATUS_PAID = 'paid';
 
+    public const STATUS_APPROVED = 'approved';
+
+    public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     public const STATUS_EXPIRED = 'expired';
