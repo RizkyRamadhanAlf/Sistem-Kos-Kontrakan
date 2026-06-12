@@ -32,8 +32,10 @@ class PaymentCheckoutTest extends TestCase
             ->get(route('booking.payment.show', $booking))
             ->assertOk()
             ->assertSee('Selesaikan Pembayaran')
-            ->assertSee('Pilih Metode Pembayaran')
-            ->assertSee('Pembayaran Aman dan Terenkripsi');
+            ->assertSee('Pembayaran Aman &amp; Terpercaya', false)
+            ->assertSee('Metode pembayaran yang didukung')
+            ->assertDontSee('Pilih Metode Pembayaran')
+            ->assertDontSee('data-method=');
 
         $payment = Payment::where('booking_id', $booking->id)->firstOrFail();
         $this->assertSame(Payment::STATUS_PENDING, $payment->payment_status);

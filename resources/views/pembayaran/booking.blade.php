@@ -37,7 +37,7 @@
     .countdown { font-size:22px; font-weight:800; letter-spacing:1px; }
     .premium-card { background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
     .premium-card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); }
-    .premium-card, .method-card, .pay-btn { transition:all .22s ease; }
+    .premium-card, .pay-btn { transition:all .22s ease; }
     .card-pad { padding:22px; }
     .section-title { font-size:16px; font-weight:800; margin:0; }
     .section-sub { color:var(--text-muted); font-size:12px; margin:3px 0 0; }
@@ -54,14 +54,13 @@
     .summary-row span:first-child { color:var(--text-secondary); }
     .total-box { background:linear-gradient(135deg,var(--teal-light),var(--green-light)); border:1px solid #99d5cf; border-radius:12px; margin-top:17px; padding:15px; }
     .total-price { color:var(--teal-dark); font-size:22px; font-weight:800; }
-    .method-grid { display:grid; gap:9px; grid-template-columns:repeat(2,minmax(0,1fr)); }
-    .method-card { align-items:center; background:var(--surface); border:1.5px solid var(--border); border-radius:10px; cursor:pointer; display:flex; gap:10px; min-height:58px; padding:10px 12px; position:relative; }
-    .method-card:hover { border-color:var(--teal); box-shadow:0 7px 18px rgba(13,148,136,.12); transform:translateY(-2px); }
-    .method-card.selected { background:var(--teal-light); border-color:var(--teal); }
-    .method-icon { align-items:center; background:var(--bg); border-radius:9px; color:var(--teal); display:flex; flex:0 0 34px; height:34px; justify-content:center; }
-    .method-name { font-size:11px; font-weight:800; line-height:1.3; }
-    .method-check { color:var(--teal); display:none; position:absolute; right:8px; top:6px; }
-    .method-card.selected .method-check { display:block; }
+    .gateway-card { background:linear-gradient(145deg,#ecfdf5,#f8fafc); border:1px solid #99d5cf; border-radius:12px; padding:16px; }
+    .gateway-icon { align-items:center; background:var(--teal); border-radius:12px; color:#fff; display:flex; flex:0 0 42px; height:42px; justify-content:center; }
+    .supported-methods { display:flex; flex-wrap:wrap; gap:8px; }
+    .supported-method { align-items:center; background:#fff; border:1px solid var(--border); border-radius:8px; color:var(--text-primary); display:inline-flex; font-size:10px; font-weight:800; gap:6px; padding:7px 9px; }
+    .supported-method i { color:var(--teal); }
+    .trust-grid { display:grid; gap:8px; grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .trust-item { align-items:center; color:var(--teal-dark); display:flex; font-size:10px; font-weight:700; gap:5px; }
     .payment-detail { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:13px; }
     .detail-row { display:flex; font-size:11px; justify-content:space-between; margin-bottom:8px; }
     .detail-row:last-child { margin-bottom:0; }
@@ -81,7 +80,7 @@
     .loader-grid { display:grid; gap:18px; grid-template-columns:1.4fr .8fr; margin:120px auto; max-width:1140px; padding:0 16px; }
     .loader-card { height:260px; } .loader-card.short { height:180px; }
     @media(max-width:991px) { .sticky-summary { position:static; } }
-    @media(max-width:575px) { .info-grid,.method-grid { grid-template-columns:1fr; } .invoice-bar .col-sm-4 { margin-top:12px; } .checkout-title { font-size:21px; } }
+    @media(max-width:575px) { .info-grid,.trust-grid { grid-template-columns:1fr; } .invoice-bar .col-sm-4 { margin-top:12px; } .checkout-title { font-size:21px; } }
   </style>
 </head>
 <body>
@@ -154,7 +153,7 @@
             <div class="detail-row"><span>Invoice</span><strong>{{ $payment->invoice_number }}</strong></div>
             <div class="detail-row"><span>Status</span><strong id="detailStatus">{{ $statusLabels[$status] ?? ucfirst($status) }}</strong></div>
             <div class="detail-row"><span>Batas Pembayaran</span><strong>{{ $deadline->translatedFormat('d F Y, H:i') }} WIB</strong></div>
-            <div class="detail-row"><span>Metode Dipilih</span><strong id="selectedMethod">{{ $payment->payment_method ?? 'Belum dipilih' }}</strong></div>
+            <div class="detail-row"><span>Payment Gateway</span><strong>Midtrans Snap</strong></div>
           </div>
         </section>
       </div>
@@ -171,17 +170,29 @@
           </section>
 
           <section class="premium-card card-pad fade-up">
-            <h2 class="section-title">Pilih Metode Pembayaran</h2>
-            <p class="section-sub mb-3">Pilihan final dilakukan pada popup Midtrans.</p>
-            <div class="method-grid mb-4">
-              @foreach([
-                ['QRIS','bi-qr-code','QRIS'], ['BCA Virtual Account','bi-bank','BCA VA'], ['BNI Virtual Account','bi-bank','BNI VA'],
-                ['BRI Virtual Account','bi-bank','BRI VA'], ['Mandiri Virtual Account','bi-bank','Mandiri VA'], ['GoPay','bi-wallet2','GoPay'],
-                ['OVO','bi-wallet2','OVO'], ['DANA','bi-wallet2','DANA'], ['ShopeePay','bi-wallet2','ShopeePay'],
-                ['Kartu Kredit / Debit','bi-credit-card','Kartu'], ['Indomaret','bi-shop','Indomaret'], ['Alfamart','bi-shop','Alfamart']
-              ] as [$name,$icon,$short])
-                <button type="button" class="method-card" data-method="{{ $name }}"><span class="method-icon"><i class="bi {{ $icon }}"></i></span><span class="method-name">{{ $short }}</span><i class="bi bi-check-circle-fill method-check"></i></button>
-              @endforeach
+            <div class="gateway-card mb-4">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="gateway-icon"><i class="bi bi-shield-lock-fill"></i></span>
+                <div>
+                  <h2 class="section-title">Pembayaran Aman &amp; Terpercaya</h2>
+                  <p class="section-sub">Diproses melalui Midtrans Payment Gateway secara aman dan terenkripsi.</p>
+                </div>
+              </div>
+              <p class="section-sub mb-2">Metode pembayaran yang didukung:</p>
+              <div class="supported-methods mb-3">
+                @foreach([
+                  ['QRIS','bi-qr-code'], ['BCA VA','bi-bank'], ['BNI VA','bi-bank'], ['BRI VA','bi-bank'],
+                  ['Mandiri VA','bi-bank'], ['GoPay','bi-wallet2'], ['DANA','bi-wallet2'], ['ShopeePay','bi-wallet2'],
+                  ['Kartu Kredit / Debit','bi-credit-card'], ['Indomaret','bi-shop'], ['Alfamart','bi-shop']
+                ] as [$name,$icon])
+                  <span class="supported-method"><i class="bi {{ $icon }}"></i>{{ $name }}</span>
+                @endforeach
+              </div>
+              <div class="trust-grid">
+                <span class="trust-item"><i class="bi bi-check-circle-fill"></i>Transaksi Aman</span>
+                <span class="trust-item"><i class="bi bi-check-circle-fill"></i>Data Terenkripsi</span>
+                <span class="trust-item"><i class="bi bi-check-circle-fill"></i>Pembayaran Instan</span>
+              </div>
             </div>
 
             <button id="payNow" class="pay-btn mb-3" {{ $canPay ? '' : 'disabled' }}><i class="bi bi-shield-check me-2"></i>Bayar Sekarang</button>
@@ -190,7 +201,7 @@
               <form action="{{ route('booking.cancel', $booking) }}" method="POST" onsubmit="return confirm('Batalkan booking ini?')">@csrf<button class="btn btn-outline-danger w-100"><i class="bi bi-x-circle me-2"></i>Batalkan Booking</button></form>
             @endif
 
-            <div class="safety-box mt-4"><strong><i class="bi bi-lock-fill me-1"></i>Pembayaran Aman dan Terenkripsi</strong><div class="mt-1">Transaksi diproses melalui Midtrans dengan enkripsi keamanan tingkat tinggi.</div><div class="payment-logos"><i class="bi bi-shield-check"></i><i class="bi bi-credit-card-2-front"></i><i class="bi bi-qr-code"></i><strong style="font-size:12px">MIDTRANS</strong></div></div>
+            <div class="safety-box mt-4"><strong><i class="bi bi-lock-fill me-1"></i>Pembayaran Aman melalui Midtrans</strong><div class="mt-1">Pilih metode pembayaran langsung pada popup resmi Midtrans setelah menekan Bayar Sekarang.</div><div class="payment-logos"><i class="bi bi-shield-check"></i><i class="bi bi-credit-card-2-front"></i><i class="bi bi-qr-code"></i><strong style="font-size:12px">MIDTRANS</strong></div></div>
           </section>
         </aside>
       </div>
@@ -205,16 +216,8 @@
     const countdown = document.getElementById('countdown');
     const detailStatus = document.getElementById('detailStatus');
     const deadline = new Date(@json($deadline->toIso8601String())).getTime();
-    let selectedMethod = null;
     let expirySynced = false;
     window.addEventListener('load', () => document.getElementById('pageLoader')?.remove());
-
-    document.querySelectorAll('.method-card').forEach(card => card.addEventListener('click', () => {
-      document.querySelectorAll('.method-card').forEach(item => item.classList.remove('selected'));
-      card.classList.add('selected');
-      selectedMethod = card.dataset.method;
-      document.getElementById('selectedMethod').textContent = selectedMethod;
-    }));
 
     function updateCountdown() {
       const distance = deadline - Date.now();
@@ -240,10 +243,6 @@
     setInterval(updateCountdown, 1000);
 
     payBtn?.addEventListener('click', async () => {
-      if (!selectedMethod) {
-        alert('Silakan pilih metode pembayaran terlebih dahulu.');
-        return;
-      }
       if (!window.snap) {
         alert('Midtrans belum siap. Periksa MIDTRANS_CLIENT_KEY.');
         return;
@@ -253,8 +252,7 @@
       try {
         const response = await fetch(@json(route('booking.payment.snap', $booking)), {
           method: 'POST',
-          headers: {'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},
-          body: JSON.stringify({method:selectedMethod})
+          headers: {'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content}
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'Gagal membuat transaksi.');

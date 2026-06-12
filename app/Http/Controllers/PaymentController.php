@@ -135,9 +135,6 @@ class PaymentController extends Controller
     public function createSnapToken(Request $request, Booking $booking)
     {
         $this->authorize('view', $booking);
-        $validated = $request->validate([
-            'method' => ['nullable', 'string', 'max:100'],
-        ]);
 
         // prevent paying already paid bookings
         if ($booking->status === Booking::STATUS_PAID) {
@@ -209,7 +206,6 @@ class PaymentController extends Controller
                 'status' => Payment::STATUS_PENDING,
                 'snap_token' => $snapToken,
                 'expired_at' => now()->addDay(),
-                'payment_method' => $validated['method'] ?? null,
             ]);
         } else {
             $existing->update([
@@ -221,7 +217,6 @@ class PaymentController extends Controller
                 'payment_date' => now(),
                 'order_id' => $orderId,
                 'invoice_number' => $invoice,
-                'payment_method' => $validated['method'] ?? $existing->payment_method,
             ]);
             $payment = $existing;
         }
