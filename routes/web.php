@@ -21,15 +21,18 @@ Route::middleware('auth')->group(function () {
         abort(403, 'Role pengguna tidak dikenali.');
     })->name('dashboard');
 
-
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 });
 
-Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->name('payments.webhook');
+Route::post('/midtrans/notification', [PaymentController::class, 'notificationHandler'])->name('midtrans.notification');
+Route::post('/payments/webhook', [PaymentController::class, 'notificationHandler'])->name('payments.webhook');
 Route::get('/payments/success', [PaymentController::class, 'success'])->name('payments.success');
 Route::get('/payments/fail', [PaymentController::class, 'fail'])->name('payments.fail');
+
+Route::middleware('auth')->get('/payment/{payment}/check-status', [PaymentController::class, 'checkStatus'])
+    ->name('payment.check-status');
 
 require __DIR__.'/auth.php';

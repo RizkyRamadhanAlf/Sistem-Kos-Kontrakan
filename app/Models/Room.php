@@ -9,6 +9,12 @@ class Room extends Model
 {
     use HasFactory;
 
+    public const STATUS_AVAILABLE = 'available';
+
+    public const STATUS_BOOKED = 'booked';
+
+    public const STATUS_OCCUPIED = 'occupied';
+
     protected $fillable = [
         'property_id',
         'room_number',

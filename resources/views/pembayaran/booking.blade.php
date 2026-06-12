@@ -259,7 +259,7 @@
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'Gagal membuat transaksi.');
         window.snap.pay(result.token, {
-          onSuccess: () => window.location = @json(route('payments.success')),
+          onSuccess: () => window.location = @json(route('payment.check-status', $payment)),
           onPending: () => window.location = @json(route('payments.success')),
           onError: () => window.location = @json(route('payments.fail')),
           onClose: resetButton
