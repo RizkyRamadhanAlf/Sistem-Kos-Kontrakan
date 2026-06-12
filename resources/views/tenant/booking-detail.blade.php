@@ -3,6 +3,22 @@
 @section('title', 'Detail Booking - KostKu')
 
 @section('content')
+@php
+    $paymentStatus = $booking->payment?->payment_status;
+    $canCancel = in_array($booking->status, [\App\Models\Booking::STATUS_PENDING, 'menunggu pembayaran'], true)
+        && (!$booking->payment || in_array($paymentStatus, [\App\Models\Payment::STATUS_PENDING, 'unpaid', null], true));
+    $statusBadges = [
+        \App\Models\Booking::STATUS_PENDING => ['warning', 'Menunggu Pembayaran'],
+        \App\Models\Booking::STATUS_PAID => ['success', 'Paid'],
+        'confirmed' => ['primary', 'Confirmed'],
+        'active' => ['primary', 'Active'],
+        \App\Models\Booking::STATUS_CANCELLED => ['danger', 'Cancelled'],
+        \App\Models\Booking::STATUS_EXPIRED => ['secondary', 'Expired'],
+        \App\Models\Booking::STATUS_COMPLETED => ['info', 'Completed'],
+    ];
+    [$badgeColor, $badgeLabel] = $statusBadges[$booking->status] ?? ['secondary', ucfirst($booking->status)];
+@endphp
+
 <div style="margin-bottom: 1.5rem;">
     <a href="{{ route('tenant.bookings') }}" class="btn btn-sm btn-outline-secondary">
         <i class="bi bi-chevron-left"></i> Kembali
@@ -41,7 +57,7 @@
             <table style="width: 100%; border-collapse: collapse;">
                 <tr style="border-bottom: 1px solid #e2e8f0;">
                     <td style="padding: 1rem 0; color: #64748b;">Tanggal Booking</td>
-                    <td style="padding: 1rem 0; text-align: right; font-weight: 600;">{{ $booking->booking_date->format('d M Y') }}</td>
+                    <td style="padding: 1rem 0; text-align: right; font-weight: 600;">{{ $booking->booking_date?->format('d M Y') ?? '-' }}</td>
                 </tr>
                 <tr style="border-bottom: 1px solid #e2e8f0;">
                     <td style="padding: 1rem 0; color: #64748b;">Durasi Sewa</td>
@@ -68,8 +84,8 @@
         <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0; margin-bottom: 2rem;">
             <h6 style="margin: 0 0 1rem; font-weight: 700;">Status Booking</h6>
             <div style="text-align: center; padding: 1.5rem; background: var(--light); border-radius: 8px;">
-                <span class="badge bg-{{ $booking->status === 'paid' ? 'success' : 'warning' }}" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                    {{ $booking->status === 'paid' ? 'Aktif' : 'Menunggu Pembayaran' }}
+                <span class="badge bg-{{ $badgeColor }}" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                    {{ $badgeLabel }}
                 </span>
             </div>
         </div>
@@ -78,16 +94,48 @@
         <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0;">
             <h6 style="margin: 0 0 1rem; font-weight: 700;">Aksi</h6>
             
-            @if($booking->status === 'pending')
-                <a href="{{ route('booking.payment.show', $booking) }}" class="btn btn-primary w-100 mb-2">
+            <div class="d-flex flex-wrap gap-2">
+            @if($canCancel)
+                <a href="{{ route('booking.payment.show', $booking) }}" class="btn btn-primary flex-fill">
                     <i class="bi bi-credit-card-fill"></i> Bayar Sekarang
                 </a>
+
+                <form id="cancel-booking-form" action="{{ route('booking.cancel', $booking) }}" method="POST" class="flex-fill">
+                    @csrf
+                    <button type="button" id="cancel-booking-button" class="btn btn-danger w-100">
+                        <i class="bi bi-x-circle-fill"></i> Batalkan Booking
+                    </button>
+                </form>
             @endif
 
-            <a href="{{ route('tenant.bookings') }}" class="btn btn-outline-secondary w-100">
+            <a href="{{ route('tenant.bookings') }}" class="btn btn-outline-secondary flex-fill">
                 <i class="bi bi-chevron-left"></i> Kembali
             </a>
+            </div>
         </div>
     </div>
 </div>
 @endsection
+
+@push('js')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('cancel-booking-button')?.addEventListener('click', () => {
+        Swal.fire({
+            title: 'Batalkan Booking?',
+            html: 'Apakah Anda yakin ingin membatalkan booking ini?<br>Tindakan ini tidak dapat dibatalkan.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Batalkan',
+            cancelButtonText: 'Tidak',
+            reverseButtons: true,
+        }).then(result => {
+            if (result.isConfirmed) {
+                document.getElementById('cancel-booking-form').submit();
+            }
+        });
+    });
+</script>
+@endpush

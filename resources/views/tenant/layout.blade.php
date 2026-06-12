@@ -155,8 +155,8 @@
                 <a href="{{ route('tenant.payments') }}" class="nav-item {{ request()->routeIs('tenant.payments*', 'tenant.payment-detail') ? 'active' : '' }}">
                     <i class="bi bi-credit-card-fill"></i> Pembayaran
                 </a>
-                <a href="{{ route('tenant.wishlist') }}" class="nav-item {{ request()->routeIs('tenant.wishlist') ? 'active' : '' }}">
-                    <i class="bi bi-heart-fill"></i> Wishlist
+                <a href="{{ route('tenant.complaints.index') }}" class="nav-item {{ request()->routeIs('tenant.complaints.*') ? 'active' : '' }}">
+                    <i class="bi bi-chat-left-dots-fill"></i> Komplain Saya
                 </a>
 
                 <p class="nav-label mt-3">Aktivitas</p>
@@ -170,6 +170,9 @@
                         <span class="badge-nav danger">{{ $unreadNotifications }}</span>
                     @endif
                 </a>
+                <a href="{{ route('tenant.wishlist') }}" class="nav-item {{ request()->routeIs('tenant.wishlist') ? 'active' : '' }}">
+                    <i class="bi bi-heart-fill"></i> Wishlist
+                </a>
 
                 <p class="nav-label mt-3">Akun</p>
                 <a href="{{ route('tenant.profile') }}" class="nav-item {{ request()->routeIs('tenant.profile') ? 'active' : '' }}">
@@ -178,7 +181,7 @@
             </nav>
 
             <div class="sidebar-user">
-                <img src="{{ Auth::user()->profile_photo_path ? asset('storage/'.Auth::user()->profile_photo_path) : 'https://i.pravatar.cc/40?img=12' }}" alt="avatar" class="user-avatar">
+                <img src="{{ Auth::user()->profile_photo_url }}" alt="avatar" class="user-avatar">
                 <div class="user-info">
                     <span class="user-name">{{ Auth::user()->name }}</span>
                     <span class="user-role">Penyewa</span>
@@ -210,7 +213,7 @@
                         @if($unreadNotifications)<span class="notif-dot"></span>@endif
                     </a>
                     <a href="{{ route('tenant.profile') }}">
-                        <img src="{{ Auth::user()->profile_photo_path ? asset('storage/'.Auth::user()->profile_photo_path) : 'https://i.pravatar.cc/36?img=12' }}" class="topbar-avatar" alt="avatar">
+                        <img src="{{ Auth::user()->profile_photo_url }}" class="topbar-avatar" alt="avatar">
                     </a>
                 </div>
             </header>

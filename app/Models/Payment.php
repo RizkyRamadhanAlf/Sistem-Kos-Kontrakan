@@ -15,6 +15,8 @@ class Payment extends Model
 
     public const STATUS_FAILED = 'failed';
 
+    public const STATUS_CANCELLED = 'cancelled';
+
     public const STATUS_EXPIRED = 'expired';
 
     protected $fillable = [
@@ -32,6 +34,7 @@ class Payment extends Model
         'expired_at',
         'payment_date',
         'receipt_path',
+        'status',
         'notes',
         'verified_at',
     ];

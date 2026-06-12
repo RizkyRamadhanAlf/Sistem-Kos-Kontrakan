@@ -7,12 +7,15 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -49,6 +52,38 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public function getProfilePhotoUrlAttribute(): string
+    {
+        return $this->profile_photo_path
+            ? Storage::disk('public')->url($this->profile_photo_path)
+            : 'https://i.pravatar.cc/150?img=12';
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function (User $user): void {
+            if (! Schema::hasTable('roles') || ! Schema::hasTable('model_has_roles')) {
+                return;
+            }
+
+            $role = match ($user->role) {
+                'admin', 'owner', 'tenant' => $user->role,
+                'penyewa', 'member' => 'tenant',
+                default => null,
+            };
+
+            if (! $role) {
+                return;
+            }
+
+            Role::findOrCreate($role);
+
+            if (($user->wasChanged('role') || ! $user->roles()->exists()) && ! $user->hasExactRoles($role)) {
+                $user->syncRoles([$role]);
+            }
+        });
+    }
+
     // Relationships
     public function bookings()
     {
@@ -63,6 +98,21 @@ class User extends Authenticatable
     public function notifications()
     {
         return $this->hasMany(Notification::class);
+    }
+
+    public function complaints()
+    {
+        return $this->hasMany(Complaint::class);
+    }
+
+    public function ownedComplaints()
+    {
+        return $this->hasMany(Complaint::class, 'owner_id');
+    }
+
+    public function complaintReplies()
+    {
+        return $this->hasMany(ComplaintReply::class);
     }
 
     public function wishlists()

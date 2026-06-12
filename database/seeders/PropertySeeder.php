@@ -59,7 +59,7 @@ class PropertySeeder extends Seeder
                 'rating' => 4.5,
                 'review_count' => 24,
                 'facilities' => ['WiFi', 'Kamar Mandi Dalam', 'AC', 'Lemari', 'Meja Belajar'],
-                'rules' => ['Tidak boleh membawa tamu lawan jenis setelah jam 8 malam', 'Jam tenang 21.00-06.00', 'Dilarang membuat keributan'],
+                'rules' => "- Tidak boleh membawa tamu lawan jenis setelah jam 8 malam\n- Jam tenang 21.00-06.00\n- Dilarang membuat keributan",
                 'status' => 'active',
             ],
             [
@@ -72,7 +72,7 @@ class PropertySeeder extends Seeder
                 'rating' => 4.8,
                 'review_count' => 18,
                 'facilities' => ['WiFi Cepat', 'Dapur Bersama', 'Lounge', 'Gym', 'Keamanan 24 Jam'],
-                'rules' => ['Jam tenang 22.00-07.00', 'Dilarang merokok di dalam kamar'],
+                'rules' => "- Jam tenang 22.00-07.00\n- Dilarang merokok di dalam kamar",
                 'status' => 'active',
             ],
             [
@@ -85,7 +85,7 @@ class PropertySeeder extends Seeder
                 'rating' => 4.2,
                 'review_count' => 15,
                 'facilities' => ['WiFi', 'Kamar Mandi Dalam', 'Kulkas', 'Lemari Besar'],
-                'rules' => ['Tidak boleh membawa tamu berlebihan', 'Bayar tepat waktu'],
+                'rules' => "- Tidak boleh membawa tamu berlebihan\n- Bayar tepat waktu",
                 'status' => 'active',
             ],
             [
@@ -98,7 +98,7 @@ class PropertySeeder extends Seeder
                 'rating' => 4.7,
                 'review_count' => 31,
                 'facilities' => ['WiFi', 'AC', 'Laundry', 'Dapur Bersama'],
-                'rules' => ['Jaga kebersihan area bersama'],
+                'rules' => '- Jaga kebersihan area bersama',
                 'status' => 'active',
             ],
             [
@@ -111,7 +111,7 @@ class PropertySeeder extends Seeder
                 'rating' => 4.6,
                 'review_count' => 20,
                 'facilities' => ['WiFi', 'Parkir', 'CCTV', 'Kamar Mandi Dalam'],
-                'rules' => ['Dilarang merokok di kamar'],
+                'rules' => '- Dilarang merokok di kamar',
                 'status' => 'active',
             ],
             [
@@ -124,7 +124,7 @@ class PropertySeeder extends Seeder
                 'rating' => 4.4,
                 'review_count' => 16,
                 'facilities' => ['Parkir', 'Dapur Pribadi', 'Air Bersih', 'Keamanan'],
-                'rules' => ['Bayar tepat waktu'],
+                'rules' => '- Bayar tepat waktu',
                 'status' => 'active',
             ],
         ];

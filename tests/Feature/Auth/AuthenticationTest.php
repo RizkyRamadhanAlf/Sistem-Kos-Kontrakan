@@ -77,8 +77,8 @@ class AuthenticationTest extends TestCase
     public function test_users_are_redirected_to_their_role_dashboard_after_login(): void
     {
         foreach ([
-            'penyewa' => 'tenant.dashboard',
-            'tenant' => 'dashboard.pemilik',
+            'tenant' => 'tenant.dashboard',
+            'owner' => 'dashboard.owner',
             'admin' => 'dashboard.admin',
         ] as $role => $route) {
             $user = User::factory()->create(['role' => $role]);

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\KostController;
@@ -24,7 +25,6 @@ Route::middleware('auth')->group(function () {
 
         abort(403, 'Role pengguna tidak dikenali.');
     })->name('dashboard');
-
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -61,7 +61,15 @@ Route::resource('kamar', \App\Http\Controllers\KamarController::class);
 Route::get('/booking/{booking}/pembayaran', [PaymentController::class, 'showBookingPayment'])->name('booking.payment.show');
 Route::post('/booking/{booking}/pembayaran/snap', [PaymentController::class, 'createSnapToken'])->name('booking.payment.snap');
 Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->name('payments.webhook');
+Route::middleware(['auth', 'role:tenant'])->post('/booking/{booking}/cancel', [BookingController::class, 'cancel'])
+    ->name('booking.cancel');
+
+Route::post('/midtrans/notification', [PaymentController::class, 'notificationHandler'])->name('midtrans.notification');
+Route::post('/payments/webhook', [PaymentController::class, 'notificationHandler'])->name('payments.webhook');
 Route::get('/payments/success', [PaymentController::class, 'success'])->name('payments.success');
 Route::get('/payments/fail', [PaymentController::class, 'fail'])->name('payments.fail');
+
+Route::middleware('auth')->get('/payment/{payment}/check-status', [PaymentController::class, 'checkStatus'])
+    ->name('payment.check-status');
 
 require __DIR__.'/auth.php';

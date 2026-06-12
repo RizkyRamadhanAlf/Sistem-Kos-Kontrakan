@@ -28,7 +28,6 @@ class Property extends Model
 
     protected $casts = [
         'facilities' => 'array',
-        'rules' => 'array',
         'rating' => 'decimal:2',
     ];
 

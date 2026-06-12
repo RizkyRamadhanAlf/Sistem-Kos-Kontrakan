@@ -24,7 +24,7 @@
                 <div class="mb-3">
                     <label class="form-label">Foto Profil</label>
                     <div style="display: flex; gap: 1rem; align-items: flex-start;">
-                        <img src="{{ $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : 'https://i.pravatar.cc/150?img=12' }}" 
+                        <img src="{{ $user->profile_photo_url }}"
                             style="width: 100px; height: 100px; border-radius: 8px; object-fit: cover;">
                         <div style="flex: 1;">
                             <input type="file" class="form-control" name="profile_photo_path" accept="image/*">

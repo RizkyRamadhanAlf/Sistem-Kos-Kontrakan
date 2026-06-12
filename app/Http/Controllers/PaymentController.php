@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-// Midtrans SDK (optional, requires composer require midtrans/midtrans)
 use Midtrans\Config as MidtransConfig;
 use Midtrans\Snap as MidtransSnap;
+use Midtrans\Transaction as MidtransTransaction;
 
 class PaymentController extends Controller
 {
@@ -133,9 +135,6 @@ class PaymentController extends Controller
     public function createSnapToken(Request $request, Booking $booking)
     {
         $this->authorize('view', $booking);
-        $validated = $request->validate([
-            'method' => ['nullable', 'string', 'max:100'],
-        ]);
 
         // prevent paying already paid bookings
         if ($booking->status === Booking::STATUS_PAID) {
@@ -207,7 +206,6 @@ class PaymentController extends Controller
                 'status' => Payment::STATUS_PENDING,
                 'snap_token' => $snapToken,
                 'expired_at' => now()->addDay(),
-                'payment_method' => $validated['method'] ?? null,
             ]);
         } else {
             $existing->update([
@@ -219,25 +217,11 @@ class PaymentController extends Controller
                 'payment_date' => now(),
                 'order_id' => $orderId,
                 'invoice_number' => $invoice,
-                'payment_method' => $validated['method'] ?? $existing->payment_method,
             ]);
             $payment = $existing;
         }
 
         return response()->json(['token' => $snapToken, 'payment' => $payment]);
-    }
-
-    public function cancelBooking(Booking $booking)
-    {
-        $this->authorize('update', $booking);
-
-        $booking->update(['status' => Booking::STATUS_CANCELLED]);
-        $booking->payment?->update([
-            'payment_status' => Payment::STATUS_FAILED,
-            'status' => Payment::STATUS_FAILED,
-        ]);
-
-        return redirect()->route('tenant.bookings')->with('success', 'Booking berhasil dibatalkan.');
     }
 
     public function expireBooking(Booking $booking)
@@ -256,81 +240,164 @@ class PaymentController extends Controller
         return response()->noContent();
     }
 
-    /**
-     * Handle Midtrans notification / webhook
-     */
-    public function webhook(Request $request)
+    public function notificationHandler(Request $request)
     {
-        $request->validate([
+        $payload = $request->validate([
             'order_id' => ['required', 'string'],
             'transaction_status' => ['required', 'string'],
             'status_code' => ['required', 'string'],
             'gross_amount' => ['required'],
             'signature_key' => ['required', 'string'],
+            'payment_type' => ['nullable', 'string'],
+            'fraud_status' => ['nullable', 'string'],
         ]);
 
         $expectedSignature = hash('sha512',
-            $request->string('order_id')
-            .$request->string('status_code')
-            .$request->input('gross_amount')
+            $payload['order_id']
+            .$payload['status_code']
+            .$payload['gross_amount']
             .config('midtrans.server_key')
         );
 
-        abort_unless(hash_equals($expectedSignature, $request->input('signature_key')), 403);
+        abort_unless(hash_equals($expectedSignature, $payload['signature_key']), 403, 'Signature Midtrans tidak valid.');
 
-        $orderId = $request->input('order_id');
-        $transactionStatus = $request->input('transaction_status');
-        $type = $request->input('payment_type');
-
-        $payment = Payment::where('order_id', $orderId)->orWhere('invoice_number', $orderId)->first();
+        $payment = Payment::where('order_id', $payload['order_id'])->first();
         if (! $payment) {
-            return response('OK', 200);
+            return response()->json(['message' => 'Payment tidak ditemukan.']);
         }
 
-        if ($transactionStatus === 'capture') {
-            if ($type === 'credit_card') {
-                if ($request->input('fraud_status') === 'challenge') {
-                    $payment->payment_status = 'challenge';
-                } else {
-                    $payment->payment_status = Payment::STATUS_PAID;
-                    $payment->status = Payment::STATUS_PAID;
-                }
-            }
-        } elseif ($transactionStatus === 'settlement') {
-            $payment->payment_status = Payment::STATUS_PAID;
-            $payment->status = Payment::STATUS_PAID;
-        } elseif ($transactionStatus === 'pending') {
-            $payment->payment_status = Payment::STATUS_PENDING;
-            $payment->status = Payment::STATUS_PENDING;
-        } elseif ($transactionStatus === 'deny') {
-            $payment->payment_status = Payment::STATUS_FAILED;
-            $payment->status = Payment::STATUS_FAILED;
-        } elseif ($transactionStatus === 'expire') {
-            $payment->payment_status = Payment::STATUS_EXPIRED;
-            $payment->status = Payment::STATUS_EXPIRED;
-            $payment->expired_at = now();
-        } elseif ($transactionStatus === 'cancel') {
-            $payment->payment_status = Payment::STATUS_FAILED;
-            $payment->status = Payment::STATUS_FAILED;
+        abort_unless(
+            (int) round((float) $payload['gross_amount']) === (int) round((float) ($payment->gross_amount ?? $payment->amount)),
+            422,
+            'Nominal pembayaran Midtrans tidak sesuai.'
+        );
+
+        if ($payment->payment_status !== Payment::STATUS_PAID) {
+            $this->applyMidtransStatus(
+                $payment,
+                $payload['transaction_status'],
+                $payload['payment_type'] ?? null,
+            );
         }
 
-        $payment->payment_method = $type;
+        return response()->json(['message' => 'Notifikasi Midtrans berhasil diproses.']);
+    }
+
+    public function checkStatus(Payment $payment)
+    {
+        $this->authorize('view', $payment);
+
         if ($payment->payment_status === Payment::STATUS_PAID) {
-            $payment->paid_at = now();
-            $payment->verified_at = now();
+            return redirect()
+                ->route('tenant.payment-detail', $payment)
+                ->with('success', 'Pembayaran berhasil.');
         }
 
-        $payment->save();
+        if (! $payment->order_id) {
+            return redirect()
+                ->route('tenant.payment-detail', $payment)
+                ->with('error', 'Order ID Midtrans belum tersedia.');
+        }
 
-        if ($payment->booking_id && $payment->payment_status === Payment::STATUS_PAID) {
-            $booking = Booking::find($payment->booking_id);
-            if ($booking) {
-                $booking->status = Booking::STATUS_PAID;
-                $booking->save();
+        $this->configureMidtrans();
+
+        try {
+            $transaction = $this->getMidtransStatus($payment->order_id);
+            $grossAmount = (float) ($transaction->gross_amount ?? 0);
+            $expectedAmount = (float) ($payment->gross_amount ?? $payment->amount);
+
+            if ((int) round($grossAmount) !== (int) round($expectedAmount)) {
+                return redirect()
+                    ->route('tenant.payment-detail', $payment)
+                    ->with('error', 'Nominal transaksi Midtrans tidak sesuai.');
             }
+
+            $this->applyMidtransStatus(
+                $payment,
+                $transaction->transaction_status,
+                $transaction->payment_type ?? null,
+            );
+        } catch (\Throwable $e) {
+            report($e);
+
+            return redirect()
+                ->route('tenant.payment-detail', $payment)
+                ->with('error', 'Status pembayaran belum dapat diperiksa. Silakan coba lagi.');
         }
 
-        return response()->json(['message' => 'Webhook received']);
+        return redirect()
+            ->route('tenant.payment-detail', $payment)
+            ->with(
+                $payment->fresh()->payment_status === Payment::STATUS_PAID ? 'success' : 'status',
+                $payment->fresh()->payment_status === Payment::STATUS_PAID
+                    ? 'Pembayaran berhasil.'
+                    : 'Status pembayaran berhasil diperbarui.'
+            );
+    }
+
+    protected function applyMidtransStatus(Payment $payment, string $transactionStatus, ?string $paymentType): void
+    {
+        $status = match ($transactionStatus) {
+            'settlement', 'capture' => Payment::STATUS_PAID,
+            'pending' => Payment::STATUS_PENDING,
+            'cancel' => Payment::STATUS_CANCELLED,
+            'expire' => Payment::STATUS_EXPIRED,
+            'deny', 'failure' => Payment::STATUS_FAILED,
+            default => null,
+        };
+
+        if (! $status || $payment->payment_status === Payment::STATUS_PAID) {
+            return;
+        }
+
+        DB::transaction(function () use ($payment, $status, $paymentType): void {
+            $payment->loadMissing('booking.room');
+            $payment->payment_status = $status;
+            $payment->status = $status;
+            $payment->payment_method = $paymentType ?? $payment->payment_method;
+
+            if ($status === Payment::STATUS_PAID) {
+                $payment->paid_at = $payment->paid_at ?? now();
+                $payment->verified_at = now();
+            }
+
+            if ($status === Payment::STATUS_EXPIRED) {
+                $payment->expired_at = now();
+            }
+
+            $payment->save();
+
+            $booking = $payment->booking;
+            if (! $booking) {
+                return;
+            }
+
+            if ($status === Payment::STATUS_PAID) {
+                $booking->update(['status' => Booking::STATUS_PAID]);
+                $booking->room?->update(['status' => Room::STATUS_BOOKED]);
+
+                return;
+            }
+
+            if ($status === Payment::STATUS_CANCELLED) {
+                $booking->update(['status' => Booking::STATUS_CANCELLED]);
+            } elseif ($status === Payment::STATUS_EXPIRED) {
+                $booking->update(['status' => Booking::STATUS_EXPIRED]);
+            }
+        });
+    }
+
+    protected function configureMidtrans(): void
+    {
+        MidtransConfig::$serverKey = config('midtrans.server_key');
+        MidtransConfig::$isProduction = config('midtrans.is_production');
+        MidtransConfig::$isSanitized = config('midtrans.is_sanitized');
+        MidtransConfig::$is3ds = config('midtrans.is_3ds');
+    }
+
+    protected function getMidtransStatus(string $orderId): object
+    {
+        return MidtransTransaction::status($orderId);
     }
 
     public function success()
