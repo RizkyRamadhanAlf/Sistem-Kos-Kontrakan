@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->string('tenant_name');
-            $table->unsignedBigInteger('amount');
+            $table->decimal('amount', 15, 2)->default(0);
             $table->date('payment_date');
             $table->string('receipt_path');
             $table->string('status')->default('pending');

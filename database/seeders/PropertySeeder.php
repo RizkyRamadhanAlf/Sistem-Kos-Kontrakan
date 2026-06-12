@@ -7,16 +7,45 @@ use App\Models\Review;
 use App\Models\Room;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class PropertySeeder extends Seeder
 {
     public function run(): void
     {
-        $owners = User::where('role', 'tenant')->pluck('id')->values();
-        $reviewers = User::where('role', 'penyewa')->pluck('id')->values();
+        $owners = User::where('role', 'owner')->pluck('id')->values();
+        $reviewers = User::where('role', 'tenant')->pluck('id')->values();
 
-        if ($owners->isEmpty() || $reviewers->isEmpty()) {
-            return;
+        // Buat user owner jika belum ada
+        if ($owners->isEmpty()) {
+            for ($i = 1; $i <= 2; $i++) {
+                $owner = User::create([
+                    'name' => "Owner $i",
+                    'email' => "owner$i@example.com",
+                    'password' => Hash::make('password'),
+                    'phone' => "08123456780$i",
+                    'address' => "Owner Address $i",
+                    'role' => 'owner',
+                ]);
+                $owner->assignRole('owner');
+                $owners->push($owner->id);
+            }
+        }
+
+        // Buat user tenant jika belum ada
+        if ($reviewers->isEmpty()) {
+            for ($i = 1; $i <= 3; $i++) {
+                $tenant = User::create([
+                    'name' => "Tenant $i",
+                    'email' => "tenant$i@example.com",
+                    'password' => Hash::make('password'),
+                    'phone' => "08123456790$i",
+                    'address' => "Tenant Address $i",
+                    'role' => 'tenant',
+                ]);
+                $tenant->assignRole('tenant');
+                $reviewers->push($tenant->id);
+            }
         }
 
         $properties = [
@@ -32,7 +61,6 @@ class PropertySeeder extends Seeder
                 'facilities' => ['WiFi', 'Kamar Mandi Dalam', 'AC', 'Lemari', 'Meja Belajar'],
                 'rules' => ['Tidak boleh membawa tamu lawan jenis setelah jam 8 malam', 'Jam tenang 21.00-06.00', 'Dilarang membuat keributan'],
                 'status' => 'active',
-                'owner_id' => 2,
             ],
             [
                 'name' => 'Kos Eksklusif Bandung',
@@ -46,7 +74,6 @@ class PropertySeeder extends Seeder
                 'facilities' => ['WiFi Cepat', 'Dapur Bersama', 'Lounge', 'Gym', 'Keamanan 24 Jam'],
                 'rules' => ['Jam tenang 22.00-07.00', 'Dilarang merokok di dalam kamar'],
                 'status' => 'active',
-                'owner_id' => 3,
             ],
             [
                 'name' => 'Kos Terjangkau Surabaya',
@@ -60,7 +87,6 @@ class PropertySeeder extends Seeder
                 'facilities' => ['WiFi', 'Kamar Mandi Dalam', 'Kulkas', 'Lemari Besar'],
                 'rules' => ['Tidak boleh membawa tamu berlebihan', 'Bayar tepat waktu'],
                 'status' => 'active',
-                'owner_id' => 2,
             ],
             [
                 'name' => 'KostKu Living Yogyakarta',
@@ -74,7 +100,6 @@ class PropertySeeder extends Seeder
                 'facilities' => ['WiFi', 'AC', 'Laundry', 'Dapur Bersama'],
                 'rules' => ['Jaga kebersihan area bersama'],
                 'status' => 'active',
-                'owner_id' => 2,
             ],
             [
                 'name' => 'Kos Urban Malang',
@@ -88,7 +113,6 @@ class PropertySeeder extends Seeder
                 'facilities' => ['WiFi', 'Parkir', 'CCTV', 'Kamar Mandi Dalam'],
                 'rules' => ['Dilarang merokok di kamar'],
                 'status' => 'active',
-                'owner_id' => 2,
             ],
             [
                 'name' => 'Kontrakan Harmoni Depok',
@@ -102,13 +126,10 @@ class PropertySeeder extends Seeder
                 'facilities' => ['Parkir', 'Dapur Pribadi', 'Air Bersih', 'Keamanan'],
                 'rules' => ['Bayar tepat waktu'],
                 'status' => 'active',
-                'owner_id' => 2,
             ],
         ];
 
         foreach ($properties as $index => $propertyData) {
-            unset($propertyData['owner_id']);
-
             $property = Property::updateOrCreate(['name' => $propertyData['name']], [
                 ...$propertyData,
                 'owner_id' => $owners[$index % $owners->count()],
@@ -162,24 +183,20 @@ class PropertySeeder extends Seeder
             // Buat review untuk setiap kos
             $reviews = [
                 [
-                    'user_id' => 4,
                     'rating' => 5,
                     'comment' => 'Kos yang sangat bersih dan nyaman. Pemilik sangat responsif terhadap keluhan. Highly recommended!',
                 ],
                 [
-                    'user_id' => 5,
                     'rating' => 4,
                     'comment' => 'Lokasi strategis dan fasilitas lengkap. Hanya saja WiFi kadang lambat di jam-jam tertentu.',
                 ],
                 [
-                    'user_id' => 6,
                     'rating' => 5,
                     'comment' => 'Terbaik! Pemilik baik, tempat bersih, fasilitas lengkap. Saya sangat puas tinggal di sini.',
                 ],
             ];
 
             foreach ($reviews as $reviewIndex => $reviewData) {
-                unset($reviewData['user_id']);
                 Review::firstOrCreate([
                     'property_id' => $property->id,
                     'user_id' => $reviewers[$reviewIndex % $reviewers->count()],
