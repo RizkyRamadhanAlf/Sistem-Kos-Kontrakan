@@ -7,6 +7,8 @@ use App\Models\Property;
 use App\Models\Room;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class TenantDashboardTest extends TestCase
@@ -101,5 +103,39 @@ class TenantDashboardTest extends TestCase
         ])->assertSessionHasErrors('duration_months');
 
         $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_updating_profile_photo_preserves_tenant_role_and_dashboard_access(): void
+    {
+        Storage::fake('public');
+        $tenant = User::factory()->create(['role' => 'tenant']);
+        $originalRoles = $tenant->getRoleNames()->all();
+        $photo = UploadedFile::fake()->createWithContent(
+            'avatar.png',
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=')
+        );
+
+        $this->actingAs($tenant)
+            ->patch(route('tenant.profile.update'), [
+                'name' => 'Penyewa Baru',
+                'email' => $tenant->email,
+                'phone' => $tenant->phone,
+                'address' => $tenant->address,
+                'profile_photo_path' => $photo,
+                'role' => 'owner',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success', 'Profil berhasil diperbarui.');
+
+        $tenant->refresh();
+        Storage::disk('public')->assertExists($tenant->profile_photo_path);
+        $this->assertSame('tenant', $tenant->role);
+        $this->assertSame($originalRoles, $tenant->getRoleNames()->all());
+
+        $this->get(route('tenant.dashboard'))->assertOk();
+        $this->get(route('tenant.profile'))->assertOk();
+        $this->get(route('tenant.bookings'))->assertOk();
+        $this->get(route('tenant.payments'))->assertOk();
+        $this->get(route('tenant.transactions'))->assertOk();
     }
 }

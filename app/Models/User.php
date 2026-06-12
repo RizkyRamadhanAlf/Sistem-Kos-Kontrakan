@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -51,6 +52,13 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public function getProfilePhotoUrlAttribute(): string
+    {
+        return $this->profile_photo_path
+            ? Storage::disk('public')->url($this->profile_photo_path)
+            : 'https://i.pravatar.cc/150?img=12';
+    }
+
     protected static function booted(): void
     {
         static::saved(function (User $user): void {
@@ -70,7 +78,7 @@ class User extends Authenticatable
 
             Role::findOrCreate($role);
 
-            if (! $user->hasExactRoles($role)) {
+            if (($user->wasChanged('role') || ! $user->roles()->exists()) && ! $user->hasExactRoles($role)) {
                 $user->syncRoles([$role]);
             }
         });

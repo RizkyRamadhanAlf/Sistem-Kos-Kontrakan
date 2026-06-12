@@ -113,7 +113,7 @@
             @forelse($reviews as $review)
                 <div style="padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0;">
                     <div style="display: flex; gap: 1rem; align-items: start;">
-                        <img src="{{ $review->user->profile_photo_path ? asset('storage/' . $review->user->profile_photo_path) : 'https://i.pravatar.cc/40' }}" 
+                        <img src="{{ $review->user->profile_photo_url }}"
                             style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                         <div style="flex: 1;">
                             <h6 style="margin: 0; font-weight: 600;">{{ $review->user->name }}</h6>

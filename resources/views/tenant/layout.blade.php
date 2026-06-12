@@ -178,7 +178,7 @@
             </nav>
 
             <div class="sidebar-user">
-                <img src="{{ Auth::user()->profile_photo_path ? asset('storage/'.Auth::user()->profile_photo_path) : 'https://i.pravatar.cc/40?img=12' }}" alt="avatar" class="user-avatar">
+                <img src="{{ Auth::user()->profile_photo_url }}" alt="avatar" class="user-avatar">
                 <div class="user-info">
                     <span class="user-name">{{ Auth::user()->name }}</span>
                     <span class="user-role">Penyewa</span>
@@ -210,7 +210,7 @@
                         @if($unreadNotifications)<span class="notif-dot"></span>@endif
                     </a>
                     <a href="{{ route('tenant.profile') }}">
-                        <img src="{{ Auth::user()->profile_photo_path ? asset('storage/'.Auth::user()->profile_photo_path) : 'https://i.pravatar.cc/36?img=12' }}" class="topbar-avatar" alt="avatar">
+                        <img src="{{ Auth::user()->profile_photo_url }}" class="topbar-avatar" alt="avatar">
                     </a>
                 </div>
             </header>
