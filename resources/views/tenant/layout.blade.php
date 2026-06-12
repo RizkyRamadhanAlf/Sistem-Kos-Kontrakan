@@ -155,8 +155,8 @@
                 <a href="{{ route('tenant.payments') }}" class="nav-item {{ request()->routeIs('tenant.payments*', 'tenant.payment-detail') ? 'active' : '' }}">
                     <i class="bi bi-credit-card-fill"></i> Pembayaran
                 </a>
-                <a href="{{ route('tenant.wishlist') }}" class="nav-item {{ request()->routeIs('tenant.wishlist') ? 'active' : '' }}">
-                    <i class="bi bi-heart-fill"></i> Wishlist
+                <a href="{{ route('tenant.complaints.index') }}" class="nav-item {{ request()->routeIs('tenant.complaints.*') ? 'active' : '' }}">
+                    <i class="bi bi-chat-left-dots-fill"></i> Komplain Saya
                 </a>
 
                 <p class="nav-label mt-3">Aktivitas</p>
@@ -169,6 +169,9 @@
                     @if($unreadNotifications)
                         <span class="badge-nav danger">{{ $unreadNotifications }}</span>
                     @endif
+                </a>
+                <a href="{{ route('tenant.wishlist') }}" class="nav-item {{ request()->routeIs('tenant.wishlist') ? 'active' : '' }}">
+                    <i class="bi bi-heart-fill"></i> Wishlist
                 </a>
 
                 <p class="nav-label mt-3">Akun</p>

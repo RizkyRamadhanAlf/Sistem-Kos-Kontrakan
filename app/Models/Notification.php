@@ -16,6 +16,7 @@ class Notification extends Model
         'type',
         'booking_id',
         'payment_id',
+        'complaint_id',
         'read_at',
     ];
 
@@ -36,6 +37,11 @@ class Notification extends Model
     public function payment()
     {
         return $this->belongsTo(Payment::class);
+    }
+
+    public function complaint()
+    {
+        return $this->belongsTo(Complaint::class);
     }
 
     public function markAsRead()

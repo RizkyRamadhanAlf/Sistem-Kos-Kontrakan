@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\Owner\ComplaintController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\Owner\PropertyController;
 use App\Http\Controllers\Owner\RoomController;
@@ -23,6 +24,10 @@ Route::get('/payments', [OwnerDashboardController::class, 'payments'])->name('ow
 Route::get('/revenue', [OwnerDashboardController::class, 'revenue'])->name('owner.revenue');
 Route::get('/reports', [OwnerDashboardController::class, 'reports'])->name('owner.reports');
 Route::get('/notifications', [OwnerDashboardController::class, 'notifications'])->name('owner.notifications');
+Route::get('/complaints', [ComplaintController::class, 'index'])->name('owner.complaints.index');
+Route::get('/complaints/{complaint}', [ComplaintController::class, 'show'])->name('owner.complaints.show');
+Route::post('/complaints/{complaint}/reply', [ComplaintController::class, 'reply'])->name('owner.complaints.reply');
+Route::patch('/complaints/{complaint}/status', [ComplaintController::class, 'updateStatus'])->name('owner.complaints.status');
 Route::get('/profile', fn () => redirect()->route('profile.edit'))->name('owner.profile');
 Route::get('/settings', fn () => redirect()->route('profile.edit'))->name('owner.settings');
 

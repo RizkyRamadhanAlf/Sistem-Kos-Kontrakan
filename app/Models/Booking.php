@@ -65,6 +65,11 @@ class Booking extends Model
         return $this->hasOne(Payment::class);
     }
 
+    public function complaints()
+    {
+        return $this->hasMany(Complaint::class);
+    }
+
     public function getStatusBadgeClass()
     {
         return match ($this->status) {

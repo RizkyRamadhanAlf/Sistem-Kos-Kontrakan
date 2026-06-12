@@ -23,7 +23,7 @@
     @foreach([
       ['dashboard.owner','bi-grid-1x2-fill','Dashboard'],['owner.properties','bi-houses-fill','Properti Saya'],['owner.rooms','bi-door-open-fill','Kamar Kos'],
       ['owner.bookings','bi-calendar-check-fill','Booking Masuk'],['owner.tenants','bi-people-fill','Penyewa'],['owner.payments','bi-credit-card-fill','Pembayaran'],
-      ['owner.revenue','bi-graph-up-arrow','Pendapatan'],['owner.reports','bi-file-earmark-bar-graph-fill','Laporan'],['owner.notifications','bi-bell-fill','Notifikasi']
+      ['owner.complaints.index','bi-chat-left-dots-fill','Komplain Penyewa'],['owner.revenue','bi-graph-up-arrow','Pendapatan'],['owner.reports','bi-file-earmark-bar-graph-fill','Laporan'],['owner.notifications','bi-bell-fill','Notifikasi']
     ] as [$route,$icon,$label])<a href="{{ route($route) }}" class="{{ request()->routeIs($route) ? 'active':'' }}"><i class="bi {{ $icon }}"></i>{{ $label }}</a>@endforeach
     <div class="label">Akun</div>
     <a href="{{ route('owner.profile') }}"><i class="bi bi-person-circle"></i>Profil</a><a href="{{ route('owner.settings') }}"><i class="bi bi-gear-fill"></i>Pengaturan</a>

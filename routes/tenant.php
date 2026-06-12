@@ -3,6 +3,7 @@
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Tenant\ComplaintController;
 use App\Http\Controllers\TenantDashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,11 @@ Route::get('/booking/{booking}', [$controller, 'bookingDetail'])->name('tenant.b
 Route::get('/pembayaran', [$controller, 'payments'])->name('tenant.payments');
 Route::get('/pembayaran/{payment}', [$controller, 'paymentDetail'])->name('tenant.payment-detail');
 Route::get('/pembayaran/{payment}/unduh', [$controller, 'downloadInvoice'])->name('tenant.invoice.download');
+Route::get('/komplain', [ComplaintController::class, 'index'])->name('tenant.complaints.index');
+Route::get('/komplain/buat', [ComplaintController::class, 'create'])->name('tenant.complaints.create');
+Route::post('/komplain', [ComplaintController::class, 'store'])->name('tenant.complaints.store');
+Route::get('/komplain/{complaint}', [ComplaintController::class, 'show'])->name('tenant.complaints.show');
+Route::post('/komplain/{complaint}/balas', [ComplaintController::class, 'reply'])->name('tenant.complaints.reply');
 Route::get('/wishlist', [$controller, 'wishlist'])->name('tenant.wishlist');
 Route::post('/wishlist/{property}/tambah', [$controller, 'addWishlist'])->name('tenant.wishlist.add');
 Route::post('/wishlist/{property}/hapus', [$controller, 'removeWishlist'])->name('tenant.wishlist.remove');

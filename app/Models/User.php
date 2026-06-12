@@ -100,6 +100,21 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class);
     }
 
+    public function complaints()
+    {
+        return $this->hasMany(Complaint::class);
+    }
+
+    public function ownedComplaints()
+    {
+        return $this->hasMany(Complaint::class, 'owner_id');
+    }
+
+    public function complaintReplies()
+    {
+        return $this->hasMany(ComplaintReply::class);
+    }
+
     public function wishlists()
     {
         return $this->hasMany(Wishlist::class);
