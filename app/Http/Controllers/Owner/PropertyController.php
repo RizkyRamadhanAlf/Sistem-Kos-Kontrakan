@@ -34,11 +34,22 @@ class PropertyController extends Controller
 
     private function validated(Request $request): array
     {
-        return $request->validate([
-            'name' => ['required', 'string', 'max:255'], 'location' => ['required', 'string', 'max:255'],
-            'city' => ['nullable', 'string', 'max:100'], 'province' => ['nullable', 'string', 'max:100'],
-            'description' => ['nullable', 'string'], 'image_url' => ['nullable', 'url'], 'status' => ['required', 'in:active,inactive'],
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'location' => ['required', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'province' => ['nullable', 'string', 'max:100'],
+            'description' => ['nullable', 'string'],
+            'facilities' => ['nullable', 'array'],
+            'facilities.*' => ['string', 'max:100'],
+            'rules' => ['nullable', 'string'],
+            'image_url' => ['nullable', 'url'],
+            'status' => ['required', 'in:active,inactive'],
         ]);
+
+        $data['facilities'] = $request->input('facilities', []);
+
+        return $data;
     }
 
     private function authorizeOwner(Property $property): void

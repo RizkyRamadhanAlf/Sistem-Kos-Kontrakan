@@ -11,15 +11,21 @@ class RoomController extends Controller
 {
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'property_id' => ['required', 'integer'], 'room_number' => ['required', 'string', 'max:50'],
-            'room_type' => ['required', 'string', 'max:100'], 'price_per_month' => ['required', 'numeric', 'min:0'],
-            'capacity' => ['required', 'integer', 'min:1'], 'status' => ['required', 'in:available,booked,occupied'],
-        ]);
+        $data = $this->validatedData($request);
         $property = Property::where('owner_id', auth()->id())->findOrFail($data['property_id']);
         $property->rooms()->create($data);
 
         return back()->with('success', 'Kamar berhasil ditambahkan.');
+    }
+
+    public function update(Request $request, Room $room)
+    {
+        $this->authorizeOwner($room);
+        $data = $this->validatedData($request);
+        Property::where('owner_id', auth()->id())->findOrFail($data['property_id']);
+        $room->update($data);
+
+        return back()->with('success', 'Informasi kamar berhasil diperbarui.');
     }
 
     public function updateStatus(Request $request, Room $room)
@@ -43,5 +49,20 @@ class RoomController extends Controller
     private function authorizeOwner(Room $room): void
     {
         abort_unless($room->property?->owner_id === auth()->id(), 403);
+    }
+
+    private function validatedData(Request $request): array
+    {
+        $data = $request->validate([
+            'property_id' => ['required', 'integer'],
+            'room_number' => ['required', 'string', 'max:50'],
+            'room_type' => ['required', 'string', 'max:100'],
+            'price_per_month' => ['required', 'numeric', 'min:0'],
+            'capacity' => ['required', 'integer', 'min:1'],
+            'image_url' => ['nullable', 'url'],
+            'status' => ['required', 'in:available,booked,occupied'],
+        ]);
+
+        return $data;
     }
 }

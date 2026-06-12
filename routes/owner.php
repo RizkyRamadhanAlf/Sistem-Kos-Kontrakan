@@ -13,6 +13,7 @@ Route::put('/properties/{property}', [PropertyController::class, 'update'])->nam
 Route::delete('/properties/{property}', [PropertyController::class, 'destroy'])->name('owner.properties.destroy');
 Route::get('/rooms', [OwnerDashboardController::class, 'rooms'])->name('owner.rooms');
 Route::post('/rooms', [RoomController::class, 'store'])->name('owner.rooms.store');
+Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('owner.rooms.update');
 Route::patch('/rooms/{room}/status', [RoomController::class, 'updateStatus'])->name('owner.rooms.status');
 Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('owner.rooms.destroy');
 Route::get('/bookings', [OwnerDashboardController::class, 'bookings'])->name('owner.bookings');

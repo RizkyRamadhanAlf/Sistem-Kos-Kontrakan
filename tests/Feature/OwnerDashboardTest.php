@@ -66,6 +66,42 @@ class OwnerDashboardTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_owner_can_create_property_with_description_facilities_and_rules(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+
+        $this->actingAs($owner)->post(route('owner.properties.store'), [
+            'name' => 'Kos Informasi Lengkap',
+            'location' => 'Jakarta',
+            'status' => 'active',
+            'description' => 'Kos nyaman dan aman.',
+            'facilities' => ['WiFi', 'AC', 'Keamanan 24 Jam'],
+            'rules' => "- Menjaga kebersihan.\n- Tidak membuat keributan.",
+        ])->assertRedirect();
+
+        $property = Property::where('owner_id', $owner->id)->firstOrFail();
+        $this->assertSame(['WiFi', 'AC', 'Keamanan 24 Jam'], $property->facilities);
+        $this->assertSame('Kos nyaman dan aman.', $property->description);
+        $this->assertStringContainsString('Tidak membuat keributan', $property->rules);
+    }
+
+    public function test_owner_can_update_own_property_details_but_not_another_owners_property(): void
+    {
+        [$owner, $property] = $this->createOwnerProperty();
+        [, $otherProperty] = $this->createOwnerProperty();
+        $payload = [
+            'name' => 'Kos Diperbarui', 'location' => 'Bandung', 'status' => 'active',
+            'description' => 'Deskripsi baru.', 'facilities' => ['WiFi', 'Laundry'], 'rules' => 'Aturan baru.',
+        ];
+
+        $this->actingAs($owner)->put(route('owner.properties.update', $property), $payload)->assertRedirect();
+        $property->refresh();
+        $this->assertSame('Deskripsi baru.', $property->description);
+        $this->assertSame(['WiFi', 'Laundry'], $property->facilities);
+
+        $this->actingAs($owner)->put(route('owner.properties.update', $otherProperty), $payload)->assertForbidden();
+    }
+
     private function createOwnerProperty(): array
     {
         $owner = User::factory()->create(['role' => 'owner']);

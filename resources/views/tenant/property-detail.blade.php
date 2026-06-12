@@ -45,22 +45,36 @@
 
             <hr>
 
-            <h6 style="margin: 1rem 0 0.5rem; font-weight: 700;">Deskripsi</h6>
-            <p style="margin: 0; color: #64748b; line-height: 1.6;">{{ $property->description }}</p>
+            <h6 style="margin: 1rem 0 0.5rem; font-weight: 700;"><i class="bi bi-info-circle text-primary me-1"></i> Deskripsi Kos</h6>
+            <p style="margin: 0; color: #64748b; line-height: 1.6; white-space: pre-line;">{{ $property->description ?: 'Deskripsi properti belum tersedia.' }}</p>
 
-            <h6 style="margin: 1.5rem 0 0.5rem; font-weight: 700;">Fasilitas</h6>
+            <h6 style="margin: 1.5rem 0 0.5rem; font-weight: 700;"><i class="bi bi-stars text-primary me-1"></i> Fasilitas Kos</h6>
             <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                @foreach($property->facilities ?? [] as $facility)
-                    <span class="badge bg-light text-dark">{{ $facility }}</span>
-                @endforeach
+                @forelse($property->facilities ?? [] as $facility)
+                    <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-check-circle me-1"></i>{{ $facility }}</span>
+                @empty
+                    <span class="text-secondary small">Informasi fasilitas belum tersedia.</span>
+                @endforelse
             </div>
 
-            <h6 style="margin: 1.5rem 0 0.5rem; font-weight: 700;">Peraturan</h6>
-            <ul style="margin: 0; padding-left: 1.5rem; color: #64748b;">
-                @foreach($property->rules ?? [] as $rule)
-                    <li>{{ $rule }}</li>
-                @endforeach
-            </ul>
+            @php
+                $propertyRules = array_values(array_filter(array_map(
+                    fn ($rule) => ltrim(trim($rule), '- '),
+                    preg_split('/\r\n|\r|\n/', $property->rules ?? '')
+                )));
+            @endphp
+            <div class="mt-4 p-3 rounded-3 border border-warning-subtle bg-warning-subtle">
+                <h6 class="fw-bold mb-2"><i class="bi bi-shield-check text-warning-emphasis me-1"></i> Aturan Kos</h6>
+                @if(count($propertyRules))
+                    <ul class="mb-0 ps-3 text-secondary">
+                        @foreach($propertyRules as $rule)
+                            <li>{{ $rule }}</li>
+                        @endforeach
+                    </ul>
+                @else
+                    <span class="text-secondary small">Informasi aturan belum tersedia.</span>
+                @endif
+            </div>
         </div>
 
         <!-- Kamar Tersedia -->

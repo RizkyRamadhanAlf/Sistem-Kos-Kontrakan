@@ -105,6 +105,30 @@ class TenantDashboardTest extends TestCase
         $this->assertDatabaseCount('bookings', 0);
     }
 
+    public function test_tenant_property_detail_displays_property_information(): void
+    {
+        $tenant = User::factory()->create(['role' => 'penyewa']);
+        $owner = User::factory()->create(['role' => 'owner']);
+        $property = Property::create([
+            'owner_id' => $owner->id, 'name' => 'Kos Informasi Lengkap',
+            'location' => 'Jakarta', 'status' => 'active',
+            'description' => 'Kos dengan lingkungan nyaman.',
+            'facilities' => ['WiFi', 'Kamar Mandi Dalam'],
+            'rules' => "- Tidak membawa hewan peliharaan.\n- Menjaga kebersihan.",
+        ]);
+        $property->rooms()->create([
+            'room_number' => 'A-10', 'room_type' => 'Deluxe', 'price_per_month' => 1800000,
+            'capacity' => 1, 'status' => Room::STATUS_AVAILABLE,
+        ]);
+
+        $this->actingAs($tenant)->get(route('tenant.property-detail', $property))
+            ->assertOk()
+            ->assertSee('Deskripsi Kos')
+            ->assertSee('Kos dengan lingkungan nyaman.')
+            ->assertSee('Kamar Mandi Dalam')
+            ->assertSee('Tidak membawa hewan peliharaan.');
+    }
+
     public function test_updating_profile_photo_preserves_tenant_role_and_dashboard_access(): void
     {
         Storage::fake('public');
