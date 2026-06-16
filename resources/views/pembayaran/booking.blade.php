@@ -257,10 +257,18 @@
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'Gagal membuat transaksi.');
         window.snap.pay(result.token, {
-          onSuccess: () => window.location = @json(route('payment.check-status', $payment)),
-          onPending: () => window.location = @json(route('payment.check-status', $payment)),
-          onError: () => window.location = @json(route('payments.fail')),
-          onClose: resetButton
+            onSuccess: () => window.location = @json(route('payment.check-status', $payment)),
+
+            onPending: function(result) {
+                detailStatus.textContent = 'Menunggu Pembayaran';
+                resetButton();
+            },
+
+            onError: () => window.location = @json(route('payments.fail')),
+
+            onClose: function() {
+                resetButton();
+            }
         });
       } catch (error) {
         alert(error.message);
