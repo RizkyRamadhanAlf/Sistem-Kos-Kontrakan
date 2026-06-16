@@ -58,7 +58,7 @@
     <div class="sidebar-user">
       <img src="https://i.pravatar.cc/40?img=3" alt="avatar" class="user-avatar"/>
       <div class="user-info">
-        <span class="user-name">{{ auth()->user()->name }}</span>
+        <span class="user-name">{{ auth()->user()->name ?? 'Guest' }}</span>
         <span class="user-role">Administrator</span>
       </div>
       <form action="{{ route('logout') }}" method="POST" class="d-inline">

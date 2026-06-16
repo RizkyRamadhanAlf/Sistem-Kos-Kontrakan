@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\BookingController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Tenant\ComplaintController;
 use App\Http\Controllers\TenantDashboardController;
+use App\Http\Controllers\BookingController;
 use Illuminate\Support\Facades\Route;
 
 $controller = TenantDashboardController::class;
