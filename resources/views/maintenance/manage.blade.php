@@ -31,9 +31,6 @@
       <a href="/" class="nav-item">
         <i class="bi bi-house-door-fill"></i> Beranda
       </a>
-      <a href="{{ route('pembayaran.upload') }}" class="nav-item">
-        <i class="bi bi-cash-coin"></i> Pembayaran
-      </a>
       <a href="{{ route('pemilik.maintenance') }}" class="nav-item active">
         <i class="bi bi-wrench-adjustable-circle-fill"></i> Maintenance
       </a>

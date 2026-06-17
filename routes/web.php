@@ -31,10 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    Route::get('/pembayaran', [PaymentController::class, 'index'])->name('pembayaran.upload');
-    Route::post('/pembayaran', [PaymentController::class, 'store'])->name('pembayaran.upload.store');
-});
+    });
 
 Route::get('/kost', [KostController::class, 'index'])
     ->name('kost.index');
@@ -62,7 +59,6 @@ Route::resource('kamar', \App\Http\Controllers\KamarController::class);
 // Booking payment routes
 Route::get('/booking/{booking}/pembayaran', [PaymentController::class, 'showBookingPayment'])->name('booking.payment.show');
 Route::post('/booking/{booking}/pembayaran/snap', [PaymentController::class, 'createSnapToken'])->name('booking.payment.snap');
-Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->name('payments.webhook');
 Route::middleware(['auth', 'role:tenant'])->post('/booking/{booking}/cancel', [BookingController::class, 'cancel'])
     ->name('booking.cancel');
 

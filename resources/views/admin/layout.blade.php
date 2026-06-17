@@ -14,9 +14,6 @@
     <a href="#" class="nav-item">
         <i class="bi bi-building-fill"></i> Data Properti
     </a>
-    <a href="{{ route('pembayaran.verifikasi') }}" class="nav-item {{ request()->routeIs('pembayaran.verifikasi') ? 'active' : '' }}">
-        <i class="bi bi-cash-stack"></i> Verifikasi Pembayaran
-    </a>
 
     <p class="nav-label mt-3">Sistem</p>
     <a href="#" class="nav-item">
