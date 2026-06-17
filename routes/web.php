@@ -9,6 +9,8 @@ use App\Http\Controllers\TenantDashboardController;
 use App\Http\Controllers\MaintenanceController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/test-routing', fn () => 'Routing works!');
+
 Route::get('/', fn () => view('index'))->name('landing');
 
 Route::middleware('auth')->group(function () {
