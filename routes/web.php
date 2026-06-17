@@ -5,6 +5,8 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/test-routing', fn () => 'Routing works!');
+
 Route::get('/', fn () => view('index'))->name('landing');
 
 Route::middleware('auth')->group(function () {
