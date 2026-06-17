@@ -48,7 +48,6 @@ img { max-width: 100%; display: block; }
     width: 44px;
     height: 44px;
     border-radius: 14px;
-    background: var(--primary);
     display: grid;
     place-items: center;
     color: #fff;
